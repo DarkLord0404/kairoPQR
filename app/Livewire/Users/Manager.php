@@ -4,8 +4,10 @@ namespace App\Livewire\Users;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+#[Layout('layouts.app')]
 class Manager extends Component
 {
     public string $name = '';

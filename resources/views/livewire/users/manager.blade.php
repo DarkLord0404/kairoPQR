@@ -1,10 +1,69 @@
-<x-app-layout>
-    <div class="min-h-screen bg-slate-950 p-6 text-slate-200">
-        <div class="mx-auto max-w-5xl"><a href="{{ route('dashboard') }}" class="text-sm text-blue-300">← Volver a PQRS</a><h1 class="mt-4 text-2xl font-bold">Administración de usuarios</h1>
-            @if(session('success')) <p class="mt-4 rounded bg-emerald-950 p-3 text-emerald-300">{{ session('success') }}</p> @endif
-            <div class="mt-6 grid gap-6 md:grid-cols-3"><form wire:submit="create" class="space-y-3 rounded-xl border border-blue-900 bg-slate-900 p-5"><h2 class="font-semibold text-blue-200">Nuevo usuario</h2><input wire:model="name" class="w-full rounded border-slate-700 bg-slate-950" placeholder="Nombre"><input wire:model="email" class="w-full rounded border-slate-700 bg-slate-950" placeholder="Correo"><input wire:model="password" type="password" class="w-full rounded border-slate-700 bg-slate-950" placeholder="Contraseña (mín. 12)"><select wire:model="role" class="w-full rounded border-slate-700 bg-slate-950"><option value="administrativo">Administrativo</option><option value="master">Master</option></select><button class="w-full rounded bg-blue-600 px-4 py-2 font-semibold">Crear usuario</button>@error('email')<p class="text-sm text-red-300">{{ $message }}</p>@enderror</form>
-                <div class="md:col-span-2 overflow-hidden rounded-xl border border-blue-900 bg-slate-900"><table class="w-full text-sm"><thead class="bg-slate-800 text-left text-blue-200"><tr><th class="p-3">Usuario</th><th>Rol</th><th>Estado</th><th></th></tr></thead><tbody>@foreach($users as $user)<tr class="border-t border-slate-800"><td class="p-3">{{ $user->name }}<br><span class="text-xs text-slate-400">{{ $user->email }}</span></td><td>{{ $user->role }}</td><td>{{ $user->is_active ? 'Activo' : 'Inactivo' }}</td><td><button wire:click="toggle({{ $user->id }})" class="text-xs text-blue-300">{{ $user->is_active ? 'Desactivar' : 'Activar' }}</button></td></tr>@endforeach</tbody></table></div>
-            </div>
+<div class="max-w-5xl mx-auto">
+    <a href="{{ route('dashboard') }}" wire:navigate class="text-sm" style="color: var(--kairo-blue-dim)">&larr; Volver a analizar</a>
+    <h1 class="mt-3 mb-6 text-xl font-bold" style="color: var(--kairo-text)">Administracion de usuarios</h1>
+
+    @if (session('success'))
+        <div class="mb-5 rounded-lg p-3 text-sm" style="background: rgba(6,78,59,0.25); border: 1px solid #064e3b; color: #6ee7b7">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <div class="grid gap-6 md:grid-cols-3">
+        <form wire:submit="create" class="kairo-panel p-5 space-y-3">
+            <h2 class="kairo-label mb-2">Nuevo usuario</h2>
+
+            <input wire:model="name" class="kairo-textarea w-full text-sm p-2.5" placeholder="Nombre">
+            @error('name') <p class="text-xs" style="color:#fca5a5">{{ $message }}</p> @enderror
+
+            <input wire:model="email" class="kairo-textarea w-full text-sm p-2.5" placeholder="Correo">
+            @error('email') <p class="text-xs" style="color:#fca5a5">{{ $message }}</p> @enderror
+
+            <input wire:model="password" type="password" class="kairo-textarea w-full text-sm p-2.5" placeholder="Contraseña (min. 12)">
+            @error('password') <p class="text-xs" style="color:#fca5a5">{{ $message }}</p> @enderror
+
+            <select wire:model="role" class="kairo-textarea w-full text-sm p-2.5">
+                <option value="administrativo">Administrativo</option>
+                <option value="master">Master</option>
+            </select>
+            @error('role') <p class="text-xs" style="color:#fca5a5">{{ $message }}</p> @enderror
+
+            <button class="kairo-btn-primary w-full py-2.5 mt-2">Crear usuario</button>
+        </form>
+
+        <div class="md:col-span-2 kairo-panel overflow-hidden">
+            <table class="kairo-table">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($users as $user)
+                        <tr>
+                            <td>
+                                <span style="color: var(--kairo-text)">{{ $user->name }}</span><br>
+                                <span class="text-xs" style="color: var(--kairo-text-dim)">{{ $user->email }}</span>
+                            </td>
+                            <td style="color: var(--kairo-text-dim)">{{ $user->role }}</td>
+                            <td>
+                                @if ($user->is_active)
+                                    <span class="text-xs font-semibold px-2 py-1 rounded-md" style="background: rgba(6,78,59,0.3); color:#6ee7b7">Activo</span>
+                                @else
+                                    <span class="text-xs font-semibold px-2 py-1 rounded-md" style="background: rgba(127,29,29,0.3); color:#fca5a5">Inactivo</span>
+                                @endif
+                            </td>
+                            <td>
+                                <button wire:click="toggle({{ $user->id }})" wire:confirm="¿Confirmas este cambio de estado?" class="text-xs font-semibold" style="color: var(--kairo-blue-light)">
+                                    {{ $user->is_active ? 'Desactivar' : 'Activar' }}
+                                </button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
-</x-app-layout>
+</div>

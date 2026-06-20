@@ -34,10 +34,17 @@ new class extends Component
                         {{ __('Analizar') }}
                     </a>
 
-                    <a href="{{ route('historial') }}" wire:navigate
-                       class="inline-flex items-center px-1 pt-1 text-sm kairo-navlink {{ request()->routeIs('historial') ? 'kairo-navlink-active' : '' }}">
-                        {{ __('Historial') }}
-                    </a>
+                    @if (auth()->user()->isMaster())
+                        <a href="{{ route('historial') }}" wire:navigate
+                           class="inline-flex items-center px-1 pt-1 text-sm kairo-navlink {{ request()->routeIs('historial') ? 'kairo-navlink-active' : '' }}">
+                            {{ __('Historial') }}
+                        </a>
+
+                        <a href="{{ route('users') }}" wire:navigate
+                           class="inline-flex items-center px-1 pt-1 text-sm kairo-navlink {{ request()->routeIs('users') ? 'kairo-navlink-active' : '' }}">
+                            {{ __('Usuarios') }}
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -96,9 +103,16 @@ new class extends Component
             <a href="{{ route('dashboard') }}" wire:navigate class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('dashboard') ? 'kairo-navlink-active' : '' }}">
                 {{ __('Analizar') }}
             </a>
-            <a href="{{ route('historial') }}" wire:navigate class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('historial') ? 'kairo-navlink-active' : '' }}">
-                {{ __('Historial') }}
-            </a>
+
+            @if (auth()->user()->isMaster())
+                <a href="{{ route('historial') }}" wire:navigate class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('historial') ? 'kairo-navlink-active' : '' }}">
+                    {{ __('Historial') }}
+                </a>
+
+                <a href="{{ route('users') }}" wire:navigate class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('users') ? 'kairo-navlink-active' : '' }}">
+                    {{ __('Usuarios') }}
+                </a>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

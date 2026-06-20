@@ -12,7 +12,7 @@ Route::get('dashboard', Analyzer::class)
     ->name('dashboard');
 
 Route::get('historial', HistoryList::class)
-    ->middleware(['auth'])
+    ->middleware(['auth', 'master'])
     ->name('historial');
 
 Route::view('profile', 'profile')
