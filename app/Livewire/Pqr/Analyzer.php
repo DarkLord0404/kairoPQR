@@ -4,8 +4,10 @@ namespace App\Livewire\Pqr;
 
 use App\Models\PqrAnalysis;
 use App\Services\KairoPqrService;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+#[Layout('layouts.app')]
 class Analyzer extends Component
 {
     public string $queja = '';
