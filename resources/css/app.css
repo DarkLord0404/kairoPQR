@@ -1,3 +1,230 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ===================== Tema Kairo (oscuro / neon azul) ===================== */
+
+:root {
+    --kairo-bg: #05070d;
+    --kairo-bg-2: #0a0f1e;
+    --kairo-panel: #0d1424;
+    --kairo-border: #1e3a5f;
+    --kairo-blue: #3b82f6;
+    --kairo-blue-light: #60a5fa;
+    --kairo-blue-dim: #93c5fd;
+    --kairo-text: #e2e8f0;
+    --kairo-text-dim: #94a3b8;
+}
+
+body.kairo-theme {
+    background: radial-gradient(circle at 15% 0%, #0d1b3e 0%, var(--kairo-bg) 45%, #000 100%);
+    color: var(--kairo-text);
+    min-height: 100vh;
+}
+
+.kairo-shell {
+    min-height: 100vh;
+    background: transparent;
+}
+
+/* Navbar */
+.kairo-navbar {
+    background: linear-gradient(180deg, rgba(13, 27, 58, 0.9), rgba(5, 7, 13, 0.95));
+    border-bottom: 1px solid var(--kairo-border);
+    backdrop-filter: blur(6px);
+}
+
+.kairo-navbar a, .kairo-navbar button {
+    color: var(--kairo-text-dim);
+}
+
+.kairo-navlink {
+    color: var(--kairo-text-dim) !important;
+    border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+    font-weight: 600;
+}
+
+.kairo-navlink:hover {
+    color: var(--kairo-blue-light) !important;
+}
+
+.kairo-navlink-active {
+    color: var(--kairo-blue-light) !important;
+    border-bottom-color: var(--kairo-blue) !important;
+}
+
+.kairo-avatar-ring {
+    border-radius: 50%;
+    border: 2px solid var(--kairo-blue);
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.55);
+    object-fit: cover;
+    background: #000;
+}
+
+.kairo-badge-online {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(59, 130, 246, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--kairo-blue-dim);
+}
+
+.kairo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+}
+
+/* Cards / panels */
+.kairo-panel {
+    background: rgba(13, 20, 36, 0.75);
+    border: 1px solid var(--kairo-border);
+    border-radius: 14px;
+}
+
+.kairo-intro {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.35), rgba(5, 7, 13, 0.2));
+    border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.kairo-label {
+    color: var(--kairo-blue-light);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.kairo-textarea {
+    background: rgba(2, 4, 10, 0.65);
+    border: 1px solid var(--kairo-border);
+    border-radius: 10px;
+    color: var(--kairo-text);
+}
+
+.kairo-textarea::placeholder { color: #475569; }
+
+.kairo-textarea:focus {
+    outline: none;
+    border-color: var(--kairo-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.kairo-btn-primary {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    box-shadow: 0 4px 18px rgba(37, 99, 235, 0.4);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 10px;
+    transition: all .15s;
+}
+
+.kairo-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    box-shadow: 0 4px 24px rgba(59, 130, 246, 0.55);
+}
+
+.kairo-btn-primary:disabled {
+    background: #1e293b;
+    color: #475569;
+    box-shadow: none;
+}
+
+.kairo-error {
+    background: rgba(127, 29, 29, 0.18);
+    border: 1px solid #7f1d1d;
+    color: #fca5a5;
+}
+
+/* Result sections */
+.kairo-section {
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+}
+
+.kairo-section-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid;
+}
+
+.kairo-sec-alertas { background: rgba(127, 29, 29, 0.16); border: 1px solid #7f1d1d; }
+.kairo-sec-alertas .kairo-section-title { color: #fca5a5; border-color: #7f1d1d; }
+
+.kairo-sec-profesionales { background: rgba(120, 53, 15, 0.16); border: 1px solid #78350f; }
+.kairo-sec-profesionales .kairo-section-title { color: #fcd34d; border-color: #78350f; }
+
+.kairo-sec-resumen { background: rgba(30, 58, 138, 0.2); border: 1px solid #1e3a8a; }
+.kairo-sec-resumen .kairo-section-title { color: #93c5fd; border-color: #1e3a8a; }
+
+.kairo-sec-analisis { background: rgba(6, 78, 59, 0.18); border: 1px solid #064e3b; }
+.kairo-sec-analisis .kairo-section-title { color: #6ee7b7; border-color: #064e3b; }
+
+.kairo-sec-respuesta { background: rgba(13, 20, 36, 0.9); border: 2px solid #2563eb; }
+.kairo-sec-respuesta .kairo-section-title { color: #60a5fa; border-color: #1e3a5f; }
+
+.kairo-sec-acciones { background: rgba(76, 29, 149, 0.16); border: 1px solid #4c1d95; }
+.kairo-sec-acciones .kairo-section-title { color: #c4b5fd; border-color: #4c1d95; }
+
+.kairo-content { font-size: 0.92rem; line-height: 1.75; color: #cbd5e1; }
+.kairo-content strong { color: var(--kairo-text); }
+
+.kairo-btn-copy {
+    background: rgba(37, 99, 235, 0.18);
+    border: 1px solid #2563eb;
+    color: #93c5fd;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 4px 12px;
+}
+
+.kairo-btn-copy:hover { background: rgba(37, 99, 235, 0.35); }
+
+.kairo-alert-juridica {
+    display: inline-block;
+    background: #991b1b;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    padding: 6px 14px;
+    border-radius: 6px;
+    margin-bottom: 0.6rem;
+}
+
+/* Tables (historial) */
+.kairo-table { width: 100%; font-size: 0.9rem; }
+.kairo-table thead { background: rgba(13, 20, 36, 0.9); color: var(--kairo-blue-dim); font-size: 0.72rem; text-transform: uppercase; letter-spacing: .06em; }
+.kairo-table th, .kairo-table td { padding: 0.75rem 1rem; text-align: left; }
+.kairo-table tbody tr { border-top: 1px solid var(--kairo-border); }
+.kairo-table tbody tr:hover { background: rgba(59, 130, 246, 0.06); }
+
+.kairo-stat-card {
+    background: rgba(13, 20, 36, 0.75);
+    border: 1px solid var(--kairo-border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+}
+
+.kairo-stat-value { font-size: 1.5rem; font-weight: 800; color: var(--kairo-text); }
+.kairo-stat-label { font-size: 0.7rem; color: var(--kairo-text-dim); text-transform: uppercase; letter-spacing: .06em; }
+
+/* Dropdown / misc Breeze overrides for dark mode */
+.kairo-dropdown-panel {
+    background: var(--kairo-panel) !important;
+    border: 1px solid var(--kairo-border) !important;
+    color: var(--kairo-text) !important;
+}
