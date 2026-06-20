@@ -1,13 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Livewire\Pqr\Analyzer;
+use App\Livewire\Pqr\HistoryList;
 use App\Livewire\Users\Manager;
+use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', Analyzer::class)
     ->middleware(['auth'])
     ->name('dashboard');
+
+Route::get('historial', HistoryList::class)
+    ->middleware(['auth'])
+    ->name('historial');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
