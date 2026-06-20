@@ -3,7 +3,7 @@
     <div class="kairo-intro kairo-panel flex items-start gap-4 p-5 mb-6">
         <img src="{{ asset('kairo.png') }}" alt="Kairo" class="w-12 h-12 kairo-avatar-ring flex-shrink-0">
         <div class="text-sm leading-relaxed" style="color: var(--kairo-blue-dim)">
-            <strong style="color: var(--kairo-blue-light)">Hola, soy Kairo.</strong> Analizo quejas, PQR y derechos de peticion del servicio de urgencias. Pegue la queja del usuario y los registros clinicos disponibles; construire una respuesta institucional formal lista para revision.
+            <strong style="color: var(--kairo-blue-light)">Soy Kairo, asistente virtual de Alexander Torres.</strong> En este chat analizo quejas, PQR y derechos de peticion del servicio de urgencias. Pegue la queja del usuario y los registros clinicos disponibles; construire una respuesta institucional formal lista para revision.
         </div>
     </div>
 
