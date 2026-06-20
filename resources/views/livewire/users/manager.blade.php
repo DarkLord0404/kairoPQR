@@ -1,0 +1,10 @@
+<x-app-layout>
+    <div class="min-h-screen bg-slate-950 p-6 text-slate-200">
+        <div class="mx-auto max-w-5xl"><a href="{{ route('dashboard') }}" class="text-sm text-blue-300">← Volver a PQRS</a><h1 class="mt-4 text-2xl font-bold">Administración de usuarios</h1>
+            @if(session('success')) <p class="mt-4 rounded bg-emerald-950 p-3 text-emerald-300">{{ session('success') }}</p> @endif
+            <div class="mt-6 grid gap-6 md:grid-cols-3"><form wire:submit="create" class="space-y-3 rounded-xl border border-blue-900 bg-slate-900 p-5"><h2 class="font-semibold text-blue-200">Nuevo usuario</h2><input wire:model="name" class="w-full rounded border-slate-700 bg-slate-950" placeholder="Nombre"><input wire:model="email" class="w-full rounded border-slate-700 bg-slate-950" placeholder="Correo"><input wire:model="password" type="password" class="w-full rounded border-slate-700 bg-slate-950" placeholder="Contraseña (mín. 12)"><select wire:model="role" class="w-full rounded border-slate-700 bg-slate-950"><option value="administrativo">Administrativo</option><option value="master">Master</option></select><button class="w-full rounded bg-blue-600 px-4 py-2 font-semibold">Crear usuario</button>@error('email')<p class="text-sm text-red-300">{{ $message }}</p>@enderror</form>
+                <div class="md:col-span-2 overflow-hidden rounded-xl border border-blue-900 bg-slate-900"><table class="w-full text-sm"><thead class="bg-slate-800 text-left text-blue-200"><tr><th class="p-3">Usuario</th><th>Rol</th><th>Estado</th><th></th></tr></thead><tbody>@foreach($users as $user)<tr class="border-t border-slate-800"><td class="p-3">{{ $user->name }}<br><span class="text-xs text-slate-400">{{ $user->email }}</span></td><td>{{ $user->role }}</td><td>{{ $user->is_active ? 'Activo' : 'Inactivo' }}</td><td><button wire:click="toggle({{ $user->id }})" class="text-xs text-blue-300">{{ $user->is_active ? 'Desactivar' : 'Activar' }}</button></td></tr>@endforeach</tbody></table></div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
