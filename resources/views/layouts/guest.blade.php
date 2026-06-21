@@ -5,7 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'Kairo PQR') }}</title>
+        <link rel="icon" type="image/png" href="{{ asset('kairo.png') }}">
+        <link rel="shortcut icon" type="image/png" href="{{ asset('kairo.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('kairo.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -18,7 +21,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <a href="/" wire:navigate>
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                    <img src="{{ asset('kairo.png') }}" alt="Kairo" class="w-20 h-20 rounded-full border-2 border-blue-400 shadow-lg object-cover">
                 </a>
             </div>
 

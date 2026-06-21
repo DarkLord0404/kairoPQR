@@ -6,6 +6,9 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Kairo PQR') }}</title>
+        <link rel="icon" type="image/png" href="{{ asset('kairo.png') }}">
+        <link rel="shortcut icon" type="image/png" href="{{ asset('kairo.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('kairo.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
