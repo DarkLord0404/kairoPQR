@@ -30,8 +30,12 @@ class KairoPqrService
         // IMPORTANTE: se invoca el CLI de OpenClaw, que corre con la sesion
         // de suscripcion OpenAI (runtime Codex) ya autenticada en el VPS.
         // NUNCA usar la API de OpenAI aqui (no hay OPENAI_API_KEY de por medio).
+        // El pool de PHP-FPM corre como www-data (aislado del resto del sistema);
+        // openclaw requiere la config de /root/.openclaw, por eso se invoca via
+        // sudo con una regla restringida en /etc/sudoers.d/kairo-pqr-openclaw que
+        // SOLO permite ejecutar este comando exacto, nada mas de /root.
         $result = Process::timeout(120)->run([
-            'openclaw', 'agent', '--agent', 'main', '--message', $mensaje, '--json',
+            'sudo', '-H', '-u', 'root', 'openclaw', 'agent', '--agent', 'main', '--message', $mensaje, '--json',
         ]);
 
         if ($result->failed()) {
