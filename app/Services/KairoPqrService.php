@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Process;
+use Illuminate\Process\Exceptions\ProcessTimedOutException;
 use Illuminate\Support\Str;
-use Symfony\Component\Process\Exception\ProcessTimedOutException;
 
 class KairoPqrService
 {
-    private const PROCESS_TIMEOUT_SECONDS = 210;
+    private const PROCESS_TIMEOUT_SECONDS = 195;
 
     private const MAX_QUEJA_CHARS = 12000;
 
-    private const MAX_HISTORIA_CHARS = 45000;
+    private const MAX_HISTORIA_CHARS = 20000;
 
     /**
      * Estas secciones deben coincidir EXACTAMENTE con los titulos que el
@@ -45,8 +45,15 @@ class KairoPqrService
         // sudo con una regla restringida en /etc/sudoers.d/kairo-pqr-openclaw que
         // SOLO permite ejecutar este comando exacto, nada mas de /root.
         try {
+            $sessionKey = 'agent:main:pqr-'.Str::uuid();
             $result = Process::timeout(self::PROCESS_TIMEOUT_SECONDS)->run([
-                'sudo', '-H', '-u', 'root', 'openclaw', 'agent', '--agent', 'main', '--message', $mensaje, '--json',
+                'sudo', '-H', '-u', 'root', 'openclaw', 'agent',
+                '--agent', 'main',
+                '--session-key', $sessionKey,
+                '--thinking', 'off',
+                '--timeout', '180',
+                '--message', $mensaje,
+                '--json',
             ]);
         } catch (ProcessTimedOutException) {
             throw new \RuntimeException(
@@ -95,8 +102,8 @@ class KairoPqrService
             return $historia;
         }
 
-        $inicio = mb_substr($historia, 0, 27000);
-        $final = mb_substr($historia, -17000);
+        $inicio = mb_substr($historia, 0, 9000);
+        $final = mb_substr($historia, -10000);
 
         return $inicio
             ."\n\n[... REGISTROS INTERMEDIOS OMITIDOS PARA OPTIMIZAR EL ANALISIS ...]\n\n"
