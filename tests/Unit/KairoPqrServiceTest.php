@@ -30,4 +30,16 @@ class KairoPqrServiceTest extends TestCase
         $this->assertStringEndsWith('-FINAL', $result);
         $this->assertStringContainsString('REGISTROS INTERMEDIOS OMITIDOS', $result);
     }
+
+    #[Test]
+    public function it_scrubs_invalid_utf8_and_control_characters(): void
+    {
+        $method = new ReflectionMethod(KairoPqrService::class, 'prepararHistoria');
+        $history = "Nombre dañado \xC3\x28\x00 con registro clínico";
+        $result = $method->invoke(new KairoPqrService(), $history);
+
+        $this->assertTrue(mb_check_encoding($result, 'UTF-8'));
+        $this->assertStringNotContainsString("\x00", $result);
+        $this->assertStringContainsString('con registro clínico', $result);
+    }
 }

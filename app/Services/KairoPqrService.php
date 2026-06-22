@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Process;
 use Illuminate\Process\Exceptions\ProcessTimedOutException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 
 class KairoPqrService
@@ -62,6 +63,11 @@ class KairoPqrService
         }
 
         if ($result->failed()) {
+            Log::warning('OpenClaw no completo un analisis PQR.', [
+                'exit_code' => $result->exitCode(),
+                'category' => $this->categorizarError($result->errorOutput()),
+            ]);
+
             throw new \RuntimeException('El servicio de analisis no pudo completar la solicitud. Intente nuevamente en unos minutos.');
         }
 
@@ -97,7 +103,7 @@ class KairoPqrService
             return null;
         }
 
-        $historia = trim($historia);
+        $historia = trim($this->normalizarTexto($historia));
         if (mb_strlen($historia) <= self::MAX_HISTORIA_CHARS) {
             return $historia;
         }
@@ -112,11 +118,33 @@ class KairoPqrService
 
     private function limitarTexto(string $texto, int $maximo): string
     {
-        $texto = trim($texto);
+        $texto = trim($this->normalizarTexto($texto));
 
         return mb_strlen($texto) <= $maximo
             ? $texto
             : mb_substr($texto, 0, $maximo)."\n[... TEXTO OMITIDO ...]";
+    }
+
+    private function normalizarTexto(string $texto): string
+    {
+        $texto = mb_scrub($texto, 'UTF-8');
+        $limpio = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', ' ', $texto);
+
+        return $limpio ?? $texto;
+    }
+
+    private function categorizarError(string $error): string
+    {
+        $error = Str::lower(mb_scrub($error, 'UTF-8'));
+
+        return match (true) {
+            Str::contains($error, ['utf', 'encoding', 'invalid character']) => 'encoding',
+            Str::contains($error, ['rate limit', 'quota', 'too many requests']) => 'rate_limit',
+            Str::contains($error, ['auth', 'unauthorized', 'forbidden', 'credential']) => 'authentication',
+            Str::contains($error, ['gateway', 'connection', 'network', 'socket']) => 'connection',
+            Str::contains($error, ['context', 'too long', 'token']) => 'context_size',
+            default => 'unknown',
+        };
     }
 
     private function esNoQueja(array $secciones): bool
