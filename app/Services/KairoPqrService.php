@@ -4,9 +4,16 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 
 class KairoPqrService
 {
+    private const PROCESS_TIMEOUT_SECONDS = 210;
+
+    private const MAX_QUEJA_CHARS = 12000;
+
+    private const MAX_HISTORIA_CHARS = 45000;
+
     /**
      * Estas secciones deben coincidir EXACTAMENTE con los titulos que el
      * prompt le pide al modelo que use. Si cambias uno, cambia el otro.
@@ -22,6 +29,9 @@ class KairoPqrService
 
     public function analizar(string $queja, ?string $historia): array
     {
+        $queja = $this->limitarTexto($queja, self::MAX_QUEJA_CHARS);
+        $historia = $this->prepararHistoria($historia);
+
         $mensaje = $this->systemPrompt()
             ."\n\n---\n\nQUEJA O SOLICITUD DEL USUARIO:\n".$queja
             ."\n\nHISTORIA CLINICA O REGISTROS DISPONIBLES:\n"
@@ -34,12 +44,18 @@ class KairoPqrService
         // openclaw requiere la config de /root/.openclaw, por eso se invoca via
         // sudo con una regla restringida en /etc/sudoers.d/kairo-pqr-openclaw que
         // SOLO permite ejecutar este comando exacto, nada mas de /root.
-        $result = Process::timeout(120)->run([
-            'sudo', '-H', '-u', 'root', 'openclaw', 'agent', '--agent', 'main', '--message', $mensaje, '--json',
-        ]);
+        try {
+            $result = Process::timeout(self::PROCESS_TIMEOUT_SECONDS)->run([
+                'sudo', '-H', '-u', 'root', 'openclaw', 'agent', '--agent', 'main', '--message', $mensaje, '--json',
+            ]);
+        } catch (ProcessTimedOutException) {
+            throw new \RuntimeException(
+                'El servicio de analisis tardo mas de lo esperado. La historia fue reducida de forma segura; intente nuevamente en unos minutos.'
+            );
+        }
 
         if ($result->failed()) {
-            throw new \RuntimeException('Error al ejecutar OpenClaw: '.$result->errorOutput());
+            throw new \RuntimeException('El servicio de analisis no pudo completar la solicitud. Intente nuevamente en unos minutos.');
         }
 
         $stdout = $result->output();
@@ -66,6 +82,34 @@ class KairoPqrService
             ),
             'clasificacion' => $this->extraerClasificacion($secciones['RESUMEN DEL CASO'] ?? ''),
         ];
+    }
+
+    private function prepararHistoria(?string $historia): ?string
+    {
+        if ($historia === null || trim($historia) === '') {
+            return null;
+        }
+
+        $historia = trim($historia);
+        if (mb_strlen($historia) <= self::MAX_HISTORIA_CHARS) {
+            return $historia;
+        }
+
+        $inicio = mb_substr($historia, 0, 27000);
+        $final = mb_substr($historia, -17000);
+
+        return $inicio
+            ."\n\n[... REGISTROS INTERMEDIOS OMITIDOS PARA OPTIMIZAR EL ANALISIS ...]\n\n"
+            .$final;
+    }
+
+    private function limitarTexto(string $texto, int $maximo): string
+    {
+        $texto = trim($texto);
+
+        return mb_strlen($texto) <= $maximo
+            ? $texto
+            : mb_substr($texto, 0, $maximo)."\n[... TEXTO OMITIDO ...]";
     }
 
     private function esNoQueja(array $secciones): bool
