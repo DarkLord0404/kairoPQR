@@ -20,6 +20,10 @@ class Analyzer extends Component
 
     public ?array $secciones = null;
 
+    public ?int $tokensTotales = null;
+
+    public ?float $duracionSegundos = null;
+
     public ?string $error = null;
 
     public function analizar(KairoPqrService $service): void
@@ -50,10 +54,14 @@ class Analyzer extends Component
                 'requiere_revision_juridica' => $resultado['requiere_revision_juridica'],
                 'es_queja_valida' => $resultado['es_queja_valida'],
                 'secciones' => $resultado['secciones'],
+                'tokens_totales' => $resultado['tokens_totales'],
+                'duracion_segundos' => $resultado['duracion_segundos'],
             ]);
 
             $this->resultadoId = $registro->id;
             $this->secciones = $resultado['secciones'];
+            $this->tokensTotales = $resultado['tokens_totales'];
+            $this->duracionSegundos = $resultado['duracion_segundos'];
         } catch (\Throwable $e) {
             report($e);
             $this->error = 'No fue posible completar el analisis: '.$e->getMessage();
@@ -64,7 +72,7 @@ class Analyzer extends Component
 
     public function nuevoAnalisis(): void
     {
-        $this->reset(['queja', 'historia', 'resultadoId', 'secciones', 'error']);
+        $this->reset(['queja', 'historia', 'resultadoId', 'secciones', 'error', 'tokensTotales', 'duracionSegundos']);
     }
 
     public function render()

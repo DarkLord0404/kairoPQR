@@ -20,7 +20,7 @@ class Manager extends Component
         $data = $this->validate([
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:12'],
+            'password' => ['required', 'string', 'min:6'],
             'role' => ['required', 'in:master,administrativo'],
         ]);
 

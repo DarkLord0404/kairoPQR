@@ -9,11 +9,25 @@ use Illuminate\Support\Str;
 
 class KairoPqrService
 {
-    private const PROCESS_TIMEOUT_SECONDS = 195;
+    private const PROCESS_TIMEOUT_SECONDS = 280;
 
-    private const MAX_QUEJA_CHARS = 12000;
+    private const MAX_QUEJA_CHARS = 40000;
 
-    private const MAX_HISTORIA_CHARS = 20000;
+    private const MAX_HISTORIA_CHARS = 700000;
+
+    /**
+     * Linux limita a ~131072 bytes la longitud de UN SOLO argumento de linea
+     * de comandos (MAX_ARG_STRLEN), sin importar que ARG_MAX total sea mayor.
+     * Si el mensaje completo no cabe ahi, lo partimos en fragmentos y los
+     * enviamos uno por uno en la MISMA sesion del agente: los fragmentos
+     * intermedios solo se confirman, y el ultimo dispara el analisis completo
+     * ya con todo el contexto acumulado en la conversacion.
+     */
+    private const MAX_ARG_BYTES = 90000;
+
+    private const TIMEOUT_FRAGMENTO_SEGUNDOS = 60;
+
+    private const TIMEOUT_FINAL_SEGUNDOS = 260;
 
     /**
      * Estas secciones deben coincidir EXACTAMENTE con los titulos que el
@@ -21,9 +35,8 @@ class KairoPqrService
      */
     public const SECTIONS = [
         'ALERTAS INTERNAS',
+        'RESUMEN PARA VERIFICACION INTERNA',
         'PROFESIONALES O AREAS PARA REVISION',
-        'RESUMEN DEL CASO',
-        'ANALISIS DE REGISTROS CLINICOS',
         'RESPUESTA SUGERIDA AL USUARIO',
         'ACCIONES INTERNAS RECOMENDADAS',
     ];
@@ -45,21 +58,34 @@ class KairoPqrService
         // openclaw requiere la config de /root/.openclaw, por eso se invoca via
         // sudo con una regla restringida en /etc/sudoers.d/kairo-pqr-openclaw que
         // SOLO permite ejecutar este comando exacto, nada mas de /root.
-        try {
-            $sessionKey = 'agent:main:pqr-'.Str::uuid();
-            $result = Process::timeout(self::PROCESS_TIMEOUT_SECONDS)->run([
-                'sudo', '-H', '-u', 'root', 'openclaw', 'agent',
-                '--agent', 'main',
-                '--session-key', $sessionKey,
-                '--thinking', 'off',
-                '--timeout', '180',
-                '--message', $mensaje,
-                '--json',
-            ]);
-        } catch (ProcessTimedOutException) {
-            throw new \RuntimeException(
-                'El servicio de analisis tardo mas de lo esperado. La historia fue reducida de forma segura; intente nuevamente en unos minutos.'
-            );
+        $inicio = microtime(true);
+        $sessionKey = 'agent:main:pqr-'.Str::uuid();
+
+        if (strlen($mensaje) <= self::MAX_ARG_BYTES) {
+            $result = $this->llamarOpenClaw($sessionKey, $mensaje, self::TIMEOUT_FINAL_SEGUNDOS);
+        } else {
+            $fragmentos = $this->dividirEnFragmentos($mensaje, self::MAX_ARG_BYTES);
+            $total = count($fragmentos);
+            $result = null;
+
+            foreach ($fragmentos as $i => $fragmento) {
+                $numero = $i + 1;
+                $esUltimo = $numero === $total;
+
+                $envio = $esUltimo
+                    ? $fragmento."\n\n[FRAGMENTO {$numero} DE {$total} - FRAGMENTO FINAL. Ya recibiste el mensaje completo (instrucciones, queja e historia clinica) repartido en {$total} fragmentos. Genera ahora el analisis completo siguiendo EXACTAMENTE las instrucciones y la estructura de secciones indicadas al inicio del mensaje.]"
+                    : $fragmento."\n\n[FRAGMENTO {$numero} DE {$total} - NO respondas ni analices todavia. Responde UNICAMENTE: 'Fragmento {$numero} recibido.' y espera el siguiente fragmento.]";
+
+                $result = $this->llamarOpenClaw(
+                    $sessionKey,
+                    $envio,
+                    $esUltimo ? self::TIMEOUT_FINAL_SEGUNDOS : self::TIMEOUT_FRAGMENTO_SEGUNDOS
+                );
+
+                if ($result->failed()) {
+                    break;
+                }
+            }
         }
 
         if ($result->failed()) {
@@ -78,13 +104,32 @@ class KairoPqrService
         }
 
         $data = json_decode($matches[0], true, flags: JSON_THROW_ON_ERROR);
-        $texto = $data['payloads'][0]['text'] ?? '';
+
+        // El gateway envuelve la respuesta en "result"; el fallback embedded
+        // la devuelve sin envoltura. Aceptamos ambas formas.
+        $resultado = $data['result'] ?? $data;
+        $texto = $resultado['payloads'][0]['text'] ?? '';
 
         if ($texto === '') {
+            Log::error('OpenClaw devolvio una respuesta vacia. Payload crudo adjunto.', [
+                'userId' => auth()->id(),
+                'raw' => $resultado,
+            ]);
+
             throw new \RuntimeException('OpenClaw devolvio una respuesta vacia.');
         }
 
         $secciones = $this->parseSecciones($texto);
+        $usage = $resultado['meta']['agentMeta']['usage'] ?? null;
+
+        $clasificacion = $this->extraerClasificacion($secciones['ALERTAS INTERNAS'] ?? '');
+        if (isset($secciones['ALERTAS INTERNAS'])) {
+            $secciones['ALERTAS INTERNAS'] = trim(preg_replace(
+                '/\[CLASIFICACION:\s*(URGENCIAS|OTRO SERVICIO|MIXTA)\]/i',
+                '',
+                $secciones['ALERTAS INTERNAS']
+            ));
+        }
 
         return [
             'texto_completo' => $texto,
@@ -93,8 +138,61 @@ class KairoPqrService
             'requiere_revision_juridica' => Str::contains(
                 $secciones['ALERTAS INTERNAS'] ?? '', 'REVISION JURIDICA', ignoreCase: true
             ),
-            'clasificacion' => $this->extraerClasificacion($secciones['RESUMEN DEL CASO'] ?? ''),
+            'clasificacion' => $clasificacion,
+            'tokens_totales' => $usage['total'] ?? null,
+            'duracion_segundos' => round(microtime(true) - $inicio, 2),
         ];
+    }
+
+    private function llamarOpenClaw(string $sessionKey, string $mensaje, int $timeoutSegundos): \Illuminate\Contracts\Process\ProcessResult
+    {
+        try {
+            return Process::timeout($timeoutSegundos)->run([
+                'sudo', '-H', '-u', 'root', 'openclaw', 'agent',
+                '--agent', 'main',
+                '--session-key', $sessionKey,
+                '--thinking', 'off',
+                '--timeout', (string) $timeoutSegundos,
+                '--message', $mensaje,
+                '--json',
+            ]);
+        } catch (ProcessTimedOutException) {
+            throw new \RuntimeException(
+                'El servicio de analisis tardo mas de lo esperado. La historia fue reducida de forma segura; intente nuevamente en unos minutos.'
+            );
+        }
+    }
+
+    /**
+     * Divide un texto en fragmentos de a lo sumo $maxBytes BYTES (no caracteres),
+     * sin partir nunca un caracter multibyte UTF-8 por la mitad.
+     *
+     * @return string[]
+     */
+    private function dividirEnFragmentos(string $texto, int $maxBytes): array
+    {
+        $fragmentos = [];
+        $actual = '';
+        $bytesActuales = 0;
+
+        foreach (mb_str_split($texto) as $caracter) {
+            $bytesCaracter = strlen($caracter);
+
+            if ($bytesActuales + $bytesCaracter > $maxBytes && $actual !== '') {
+                $fragmentos[] = $actual;
+                $actual = '';
+                $bytesActuales = 0;
+            }
+
+            $actual .= $caracter;
+            $bytesActuales += $bytesCaracter;
+        }
+
+        if ($actual !== '') {
+            $fragmentos[] = $actual;
+        }
+
+        return $fragmentos;
     }
 
     private function prepararHistoria(?string $historia): ?string
@@ -108,8 +206,8 @@ class KairoPqrService
             return $historia;
         }
 
-        $inicio = mb_substr($historia, 0, 9000);
-        $final = mb_substr($historia, -10000);
+        $inicio = mb_substr($historia, 0, 320000);
+        $final = mb_substr($historia, -350000);
 
         return $inicio
             ."\n\n[... REGISTROS INTERMEDIOS OMITIDOS PARA OPTIMIZAR EL ANALISIS ...]\n\n"
@@ -149,16 +247,14 @@ class KairoPqrService
 
     private function esNoQueja(array $secciones): bool
     {
-        $resumen = $secciones['RESUMEN DEL CASO'] ?? '';
         $alertas = $secciones['ALERTAS INTERNAS'] ?? '';
 
-        return Str::contains($resumen, 'NO_ES_QUEJA', ignoreCase: true)
-            || Str::contains($alertas, 'NO_ES_QUEJA', ignoreCase: true);
+        return Str::contains($alertas, 'NO_ES_QUEJA', ignoreCase: true);
     }
 
-    private function extraerClasificacion(string $resumen): ?string
+    private function extraerClasificacion(string $alertas): ?string
     {
-        if (preg_match('/\[(URGENCIAS|OTRO SERVICIO|MIXTA)\]/i', $resumen, $m)) {
+        if (preg_match('/\[CLASIFICACION:\s*(URGENCIAS|OTRO SERVICIO|MIXTA)\]/i', $alertas, $m)) {
             return Str::upper($m[1]);
         }
 
@@ -193,7 +289,7 @@ class KairoPqrService
         return <<<'PROMPT'
 Actua como un asistente experto en analisis de PQR, derechos de peticion, quejas ante Supersalud y respuestas institucionales del SERVICIO DE URGENCIAS de una IPS de alta complejidad en Colombia (Clinica de Occidente, Cali).
 
-Tu tarea principal es: verificar primero si el texto recibido es realmente una queja/PQR/solicitud, luego determinar si corresponde al servicio de urgencias o a otro servicio, y construir una respuesta institucional formal, prudente, clara y defendible.
+Tu tarea principal es: verificar primero si el texto recibido es realmente una queja/PQR/solicitud, luego determinar si corresponde al servicio de urgencias o a otro servicio, y construir una respuesta institucional formal, prudente, clara, defendible y extensa.
 
 --- PASO 0: VALIDACION DE ENTRADA ---
 
@@ -205,14 +301,14 @@ Si NO ES UNA QUEJA, responde UNICAMENTE con esta estructura y no sigas con los d
 
 ALERTAS INTERNAS
 NO_ES_QUEJA
+[CLASIFICACION: OTRO SERVICIO]
+
+RESUMEN PARA VERIFICACION INTERNA
+- Queja: no fue posible identificar una queja real en el texto recibido.
+- Historia recibida: no aplica.
+- Que se respondio: se solicito al usuario ingresar el contenido especifico de la inconformidad.
 
 PROFESIONALES O AREAS PARA REVISION
-No aplica.
-
-RESUMEN DEL CASO
-NO_ES_QUEJA. El texto recibido no describe una queja, PQR o solicitud relacionada con atencion en salud. No es posible procesar este contenido. Por favor ingrese el texto real de la queja o solicitud del paciente o familiar.
-
-ANALISIS DE REGISTROS CLINICOS
 No aplica.
 
 RESPUESTA SUGERIDA AL USUARIO
@@ -270,23 +366,41 @@ USA EXACTAMENTE ESTOS TITULOS DE SECCION:
 
 ALERTAS INTERNAS
 Incluye "REQUIERE REVISION JURIDICA ANTES DE ENVIO" cuando ocurra: muerte del paciente o muerte cerebral; evento centinela o dano grave o irreversible; riesgo vital no atendido; demanda, tutela, denuncia, derecho de peticion formal, requerimiento judicial, Supersalud, amenaza de accion legal o solicitud probatoria; presunto error diagnostico grave, error de medicacion grave, caida con dano severo, cirugia equivocada, lateralidad incorrecta, omision de atencion critica; casos pediatricos, obstetricos, neonatales o de UCI con desenlace adverso; solicitud expresa de historia clinica, notas medicas, nombres de profesionales o investigacion formal. Explica el motivo en maximo 3 lineas. Si no aplica ninguna condicion, escribe: "Sin alertas para este caso."
+ALERTA POR HISTORIA INCOMPLETA: ademas de lo anterior, evalua si la historia clinica o los registros aportados son insuficientes para responder con precision a los puntos centrales de la queja relacionados con urgencias (por ejemplo: falta la hora de llegada, no hay registro de triage, no hay valoracion medica documentada, faltan notas de evolucion, falta interconsulta mencionada por el usuario, o en general el documento aportado parece incompleto o fragmentado). Si detectas esta situacion, agrega en esta seccion una linea adicional: "HISTORIA CLINICA INCOMPLETA: se requiere solicitar al area de historias clinicas los registros faltantes (especifica cuales) antes de poder dar una respuesta completa y precisa al usuario." Esta alerta es independiente de la revision juridica y debe incluirse siempre que aplique, asi sea el unico hallazgo del caso.
+Termina SIEMPRE esta seccion, en una linea aparte, con la marca tecnica: [CLASIFICACION: URGENCIAS] o [CLASIFICACION: OTRO SERVICIO] o [CLASIFICACION: MIXTA], segun el resultado del PASO 1. Esta marca es de uso interno y no se le explica al usuario.
+
+RESUMEN PARA VERIFICACION INTERNA
+Esta seccion es UNICAMENTE para uso interno de quien revisa el caso antes de enviarlo; no se le entrega al usuario. Preséntala en formato breve de lista, con estas tres lineas exactas como encabezado de cada dato:
+- Queja: resumen en 1 o 2 lineas de que se queja o que solicita el usuario.
+- Historia recibida: lista en orden cronologico, con su fecha, cada dato que SI se encontro en la historia clinica o los registros aportados (por ejemplo: "Ingreso: 15/06/2026 08:10. Triage: 15/06/2026 08:25. Valoracion medica: 15/06/2026 09:40. Interconsulta medicina interna: 16/06/2026 07:50."). Si no se recibio historia clinica o el documento aportado esta vacio, escribe: "No se recibieron registros de historia clinica para este caso."
+- Que se respondio: resumen en 1 o 2 lineas de la respuesta institucional que se le dio al usuario (sin repetir el texto completo de la respuesta).
 
 PROFESIONALES O AREAS PARA REVISION
-Lista los profesionales o areas del servicio de urgencias involucrados, identificables por la queja o la historia clinica. Si la queja involucra otro servicio, lista ese servicio como destinatario de redireccion, no como sujeto de revision interna de urgencias. Si no es posible identificar al profesional con la informacion disponible, indicalo. Termina con: "Este caso debe remitirse al area o profesional identificado para revision interna antes de emitir respuesta definitiva."
-
-RESUMEN DEL CASO
-Paciente, fechas de ingreso y egreso, motivo de consulta, diagnosticos, motivo de la queja, servicios involucrados, y clasificacion de competencia: [URGENCIAS / OTRO SERVICIO / MIXTA].
-
-ANALISIS DE REGISTROS CLINICOS
-Solo para los eventos que ocurrieron en urgencias. Cronologicamente: triage, valoracion inicial, estudios, interconsultas, tratamiento, evolucion, egreso o traslado. No copies extensamente la historia clinica. Si el evento no ocurrio en urgencias, indica: "El evento referido en la queja no corresponde a la atencion prestada en el servicio de urgencias."
+Lista UNICAMENTE profesionales identificados por NOMBRE PROPIO en la queja o en la historia clinica (no incluyas areas genericas como "equipo de enfermeria", "admisiones" o "triage" si no hay un nombre propio asociado). Si ningun profesional con nombre propio es identificable, escribe unicamente: "No fue posible identificar profesionales con nombre propio para este caso." y no agregues nada mas en esta seccion.
+Para cada profesional identificado con nombre propio, presenta en este formato:
+- Nombre: [nombre completo del profesional]
+- Que se interviene: [conducta, decision u omision especifica que motiva la revision]
+- Causa: [hallazgo o motivo concreto, basado en la queja o la historia clinica, que origina la revision]
+- Mensaje para la solicitud de analisis: [parrafo breve, formal, listo para copiar y pegar en el formulario interno de solicitud de analisis/aclaracion dirigido a ese profesional o a su jefe de area, resumiendo el caso y solicitando su version o aclaracion sobre el punto especifico]
 
 RESPUESTA SUGERIDA AL USUARIO
-Documento formal listo para copiar y pegar. Debe incluir:
-- Apertura institucional y reconocimiento de la inconformidad.
-- Si corresponde a urgencias: explicacion clara de lo encontrado y respuesta a cada punto de la queja.
-- Si no corresponde a urgencias: explicacion respetuosa de por que el servicio de urgencias no tiene competencia sobre ese aspecto, identificacion del area responsable y sugerencia de redireccion.
-- Si es mixta: responde por urgencias y redirige lo demas.
-- Cierre respetuoso.
+Documento extenso, formal, institucional, listo para copiar y pegar, redactado en parrafos corridos (sin subtitulos ni vinetas de seccion). NO debe incluir firma, nombre de remitente, cargo ni nombre del servicio o de la clinica al final; el cierre debe ser respetuoso pero sin firma.
+Debe integrar, en el cuerpo del texto y en este orden, sin usar los titulos literales como encabezados:
+0. IMPORTANTE: esta respuesta SOLO debe pronunciarse sobre lo que corresponde a la atencion en el servicio de urgencias, segun el filtro de competencia del PASO 1. No describas ni te pronuncies sobre el egreso/alta, la hospitalizacion posterior, ni ningun evento o servicio distinto a la atencion dentro de urgencias; si la queja incluye esos aspectos, limitate a reconocerlos brevemente y redirigirlos al area responsable (punto 5), sin entrar en detalle clinico sobre ellos.
+1. Apertura institucional y reconocimiento de la inconformidad.
+2. Resumen del caso: paciente, fecha y hora EXACTA de llegada/ingreso a urgencias, motivo de consulta, diagnosticos relevantes, motivo de la queja, servicios involucrados, y la clasificacion de competencia (urgencias, otro servicio o mixta) explicada en prosa, sin usar corchetes ni la palabra "clasificacion" como etiqueta tecnica. NO incluyas fecha ni hora de egreso, alta o traslado en este resumen.
+3. Recuento de las actividades realizadas DENTRO DEL SERVICIO DE URGENCIAS unicamente: narra cronologicamente, en prosa y con tus propias palabras (no copies extensamente la historia clinica), lo documentado durante la atencion en urgencias, citando SIEMPRE fecha y hora exacta de cada hito cuando este dato exista en la historia clinica o los registros aportados. Como minimo, si el dato esta disponible en los registros, incluye explicitamente:
+   - Fecha y hora de llegada/ingreso a urgencias.
+   - Hora y resultado de la clasificacion de triage asignada.
+   - Fecha y hora de la primera valoracion medica (medico general o quien corresponda).
+   - Si hubo interconsulta a especialista (por ejemplo internista, cirujano, etc.): si fue solicitada el mismo dia, a que hora se solicito y a que hora fue valorado por ese especialista, indicando explicitamente si la valoracion ocurrio el mismo dia de ingreso o en una fecha posterior.
+   - Horas de examenes, imagenes o procedimientos relevantes y cuando se conocieron sus resultados.
+   - Horas de administracion de medicamentos relevantes mencionados en la queja.
+   NO incluyas fecha ni hora de egreso, alta o traslado en este recuento; el analisis se limita a lo ocurrido dentro de urgencias hasta la decision clinica, sin describir el desenlace administrativo del egreso.
+   Si alguno de estos datos NO esta documentado en la historia clinica o los registros aportados, dilo explicitamente (por ejemplo: "no se evidencia en los registros aportados la hora exacta de..."); no inventes fechas, horas ni nombres que no esten en la informacion suministrada. Si la historia aportada es insuficiente para reconstruir esta cronologia, dilo aqui tambien y recuerda que ese hallazgo debe reflejarse como alerta en la seccion ALERTAS INTERNAS. Si el evento referido en la queja no ocurrio en urgencias, dilo explicitamente en esta parte del texto y no lo analices en detalle.
+4. Respuesta punto por punto UNICAMENTE a las inquietudes de la queja que correspondan a la atencion en urgencias, con el mismo criterio de prudencia del PASO 2, retomando las fechas y horas relevantes ya mencionadas en el punto 3 cuando aporten a aclarar la inquietud.
+5. Si la queja es parcial o mixta, reconoce brevemente la parte que no corresponde a urgencias y redirige al area responsable, identificandola, sin describir su desenlace clinico ni asumir su analisis.
+6. Cierre respetuoso e institucional, SIN firma ni nombre de remitente.
 
 ACCIONES INTERNAS RECOMENDADAS
 Solo acciones de revision y mejora institucional. Ejemplos validos: revision del caso con el equipo de urgencias, verificacion de trazabilidad de medicamentos, revision de tiempos de atencion, retroalimentacion al equipo sobre comunicacion o humanizacion, revision de condiciones del area, coordinacion con el area responsable para dar respuesta al usuario. NUNCA incluyas: solicitud de descargos, apertura de procesos disciplinarios, investigaciones formales contra profesionales, ni promesas de sanciones.
@@ -299,6 +413,7 @@ Interconsultas: indica hora de solicitud y hora de valoracion si estan disponibl
 Alta de urgencias: explica criterios de estabilidad clinica, ausencia de signos de alarma, concepto de especialistas y plan de manejo ambulatorio indicado.
 Hospitalizacion: si la queja es por demora en asignacion de cama, urgencias solo responde por haber tramitado la solicitud. La asignacion es responsabilidad del area de camas/hospitalizacion.
 EPS/autorizaciones: separa responsabilidad asistencial de urgencias y responsabilidad administrativa de la EPS. Usa: "la autorizacion, continuidad en red o remision corresponde a la EPS responsable del aseguramiento."
+Hospitalizacion en casa: la Clinica de Occidente NO presta el servicio de hospitalizacion en casa; esa modalidad de atencion es prestada por la EPS/entidad responsable o por otra IPS contratada para ese fin, no por esta clinica. Si la queja se refiere a hechos ocurridos durante hospitalizacion en casa, aclara expresamente que esa atencion no es prestada por esta institucion y que la responsabilidad corresponde a la entidad o IPS que presta ese servicio; no te pronuncies sobre la calidad o el desarrollo clinico de esa atencion.
 Historia clinica: no modifiques, inventes ni corrijas registros. Si hay inconsistencias evidentes, menciona "posibles inconsistencias de registro" y recomienda revision interna.
 PROMPT;
     }

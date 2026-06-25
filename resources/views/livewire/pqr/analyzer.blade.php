@@ -37,6 +37,17 @@
                 <button wire:click="nuevoAnalisis" class="ml-auto text-xs font-medium underline" style="color: var(--kairo-text-dim)">Nuevo analisis</button>
             </div>
 
+            @if ($tokensTotales || $duracionSegundos)
+                <div class="text-xs flex gap-4" style="color: var(--kairo-text-dim)">
+                    @if ($tokensTotales)
+                        <span>Tokens consumidos en esta consulta: {{ number_format($tokensTotales, 0, ',', '.') }}</span>
+                    @endif
+                    @if ($duracionSegundos)
+                        <span>Tiempo de respuesta: {{ number_format($duracionSegundos, 1, ',', '.') }} s</span>
+                    @endif
+                </div>
+            @endif
+
             @php
                 $alertas = $secciones['ALERTAS INTERNAS'] ?? '';
                 $esNoQueja = str_contains($alertas, 'NO_ES_QUEJA');
@@ -56,19 +67,14 @@
                     <div class="kairo-content whitespace-pre-line">{{ str_replace('REQUIERE REVISION JURIDICA ANTES DE ENVIO', '', $alertas) }}</div>
                 </div>
 
+                <div class="kairo-section kairo-sec-verificacion" style="border: 1px dashed var(--kairo-blue-dim); border-radius: 0.75rem; padding: 1rem;">
+                    <div class="kairo-section-title">Resumen para verificacion interna</div>
+                    <div class="kairo-content whitespace-pre-line">{{ $secciones['RESUMEN PARA VERIFICACION INTERNA'] ?? '' }}</div>
+                </div>
+
                 <div class="kairo-section kairo-sec-profesionales">
                     <div class="kairo-section-title">Profesionales o areas para revision</div>
                     <div class="kairo-content whitespace-pre-line">{{ $secciones['PROFESIONALES O AREAS PARA REVISION'] ?? '' }}</div>
-                </div>
-
-                <div class="kairo-section kairo-sec-resumen">
-                    <div class="kairo-section-title">Resumen del caso</div>
-                    <div class="kairo-content whitespace-pre-line">{{ $secciones['RESUMEN DEL CASO'] ?? '' }}</div>
-                </div>
-
-                <div class="kairo-section kairo-sec-analisis">
-                    <div class="kairo-section-title">Analisis de registros clinicos</div>
-                    <div class="kairo-content whitespace-pre-line">{{ $secciones['ANALISIS DE REGISTROS CLINICOS'] ?? '' }}</div>
                 </div>
 
                 <div class="kairo-section kairo-sec-respuesta" x-data>

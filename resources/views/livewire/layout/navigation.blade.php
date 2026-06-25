@@ -54,6 +54,8 @@ new class extends Component
                     <span>Kairo activo</span>
                 </div>
 
+                <a href="{{ route('sso.ir-a-meet') }}" class="kairo-btn-copy">Ir a Meet</a>
+
                 <!-- Settings Dropdown -->
                 <div class="hidden sm:flex sm:items-center">
                     <x-dropdown align="right" width="48" contentClasses="py-1 kairo-dropdown-panel">
