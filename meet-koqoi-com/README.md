@@ -1,14 +1,3 @@
-# Kairo — monorepo (PQR + Meet)
-
-Este repositorio contiene el codigo de las dos apps web del ecosistema Kairo:
-
-- **Raiz del repo**: `pqr.koqoi.com` — analisis de quejas/PQR con IA (Laravel + Livewire).
-- **`meet-koqoi-com/`**: `meet.koqoi.com` — catalogo de reuniones grabadas por el bot KairoMeet (Laravel + Livewire).
-
-Las dos apps comparten usuarios y tienen inicio de sesion cruzado (SSO). Ver [`ARQUITECTURA_KAIROMEET.md`](./ARQUITECTURA_KAIROMEET.md) para la explicacion completa del sistema (bot de grabacion, IA, SSO, infraestructura) y como replicarlo.
-
----
-
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
