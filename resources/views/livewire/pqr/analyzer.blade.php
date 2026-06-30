@@ -51,7 +51,7 @@
             @php
                 $alertas = $secciones['ALERTAS INTERNAS'] ?? '';
                 $esNoQueja = str_contains($alertas, 'NO_ES_QUEJA');
-                $requiereJuridica = str_contains(strtoupper($alertas), 'REVISION JURIDICA');
+                $requiereJuridica = str_contains($alertas, 'REQUIERE_REVISIÓN_JURÍDICA');
             @endphp
 
             @if ($esNoQueja)
@@ -62,9 +62,9 @@
                 <div class="kairo-section kairo-sec-alertas">
                     <div class="kairo-section-title">Alertas internas</div>
                     @if ($requiereJuridica)
-                        <span class="kairo-alert-juridica">REQUIERE REVISION JURIDICA ANTES DE ENVIO</span>
+                        <span class="kairo-alert-juridica">REQUIERE REVISIÓN JURÍDICA</span>
                     @endif
-                    <div class="kairo-content whitespace-pre-line">{{ str_replace('REQUIERE REVISION JURIDICA ANTES DE ENVIO', '', $alertas) }}</div>
+                    <div class="kairo-content whitespace-pre-line">{{ $alertas }}</div>
                 </div>
 
                 <div class="kairo-section kairo-sec-verificacion" style="border: 1px dashed var(--kairo-blue-dim); border-radius: 0.75rem; padding: 1rem;">
@@ -73,10 +73,23 @@
                 </div>
 
                 <div class="kairo-section kairo-sec-profesionales">
-                    <div class="kairo-section-title">Profesionales o areas para revision</div>
-                    <div class="kairo-content whitespace-pre-line">{{ $secciones['PROFESIONALES O AREAS PARA REVISION'] ?? '' }}</div>
+                    <div class="kairo-section-title">Profesionales o áreas para revisión</div>
+                    <div class="kairo-content whitespace-pre-line">{{ $secciones['PROFESIONALES O ÁREAS PARA REVISIÓN'] ?? '' }}</div>
                 </div>
 
+<<<<<<< HEAD
+=======
+                <div class="kairo-section kairo-sec-resumen">
+                    <div class="kairo-section-title">Resumen del caso</div>
+                    <div class="kairo-content whitespace-pre-line">{{ $secciones['RESUMEN DEL CASO'] ?? '' }}</div>
+                </div>
+
+                <div class="kairo-section kairo-sec-analisis">
+                    <div class="kairo-section-title">Análisis de registros clínicos</div>
+                    <div class="kairo-content whitespace-pre-line">{{ $secciones['ANÁLISIS DE REGISTROS CLÍNICOS'] ?? '' }}</div>
+                </div>
+
+>>>>>>> 1172247 (Actualizar prompt de PQR: más detallado, acentuado y con estructura de 10 pasos)
                 <div class="kairo-section kairo-sec-respuesta" x-data>
                     <div class="kairo-section-title flex items-center justify-between">
                         Respuesta sugerida al usuario
