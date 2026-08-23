@@ -2,6 +2,11 @@
 
 return [
 
+    'cumple' => [
+        'url' => env('CUMPLE_URL', 'https://cumple.koqoi.com'),
+        'token' => env('CUMPLE_INTEGRATION_TOKEN'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -33,6 +38,12 @@ return [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
+    ],
+
+    'google_oauth' => [
+        'client_id' => env('GOOGLE_OAUTH_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_OAUTH_CLIENT_SECRET'),
+        'redirect_uri' => env('GOOGLE_OAUTH_REDIRECT_URI'),
     ],
 
 ];
