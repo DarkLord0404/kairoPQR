@@ -35,7 +35,18 @@ class CumpleIntegrationService
             throw new RuntimeException('CUMPLE rechazó el envío ('.$response->status().'): '.$response->body());
         }
 
+        $meeting->forceFill([
+            'cumple_synced_at' => now(),
+            'cumple_synced_hash' => $this->contentHash($meeting),
+            'cumple_sync_error' => null,
+        ])->save();
+
         return $response->json();
+    }
+
+    public function isCurrent(Meeting $meeting): bool
+    {
+        return $meeting->cumple_synced_hash && hash_equals($meeting->cumple_synced_hash, $this->contentHash($meeting));
     }
 
     private function client(string $token): PendingRequest
@@ -51,5 +62,13 @@ class CumpleIntegrationService
         $path = rtrim((string) config('kairomeet.salidas_path'), '/').'/'.$file;
 
         return is_file($path) ? file_get_contents($path) ?: null : null;
+    }
+
+    private function contentHash(Meeting $meeting): string
+    {
+        return hash('sha256', implode('|', [
+            $meeting->titulo, $meeting->organizador, $meeting->fecha_inicio?->toIso8601String(),
+            $this->readOutput($meeting->acta_path), $this->readOutput($meeting->transcripcion_path),
+        ]));
     }
 }
