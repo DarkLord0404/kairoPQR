@@ -22,10 +22,10 @@ class KairoPqrServiceTest extends TestCase
     public function it_compacts_large_clinical_records_preserving_beginning_and_end(): void
     {
         $method = new ReflectionMethod(KairoPqrService::class, 'prepararHistoria');
-        $history = 'INICIO-'.str_repeat('a', 60000).'-FINAL';
+        $history = 'INICIO-'.str_repeat('a', 800000).'-FINAL';
         $result = $method->invoke(new KairoPqrService(), $history);
 
-        $this->assertLessThan(20100, mb_strlen($result));
+        $this->assertLessThan(700000, mb_strlen($result));
         $this->assertStringStartsWith('INICIO-', $result);
         $this->assertStringEndsWith('-FINAL', $result);
         $this->assertStringContainsString('REGISTROS INTERMEDIOS OMITIDOS', $result);

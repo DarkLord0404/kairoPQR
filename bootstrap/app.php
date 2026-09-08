@@ -12,7 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['master' => \App\Http\Middleware\EnsureMaster::class]);
+        $middleware->alias([
+            'master' => \App\Http\Middleware\EnsureMaster::class,
+            'acceso.pqr' => \App\Http\Middleware\EnsureAccesoPqr::class,
+            'acceso.ea' => \App\Http\Middleware\EnsureAccesoEa::class,
+            'acceso.reuniones' => \App\Http\Middleware\EnsureAccesoReuniones::class,
+        ]);
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {

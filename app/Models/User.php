@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'is_active'])]
+#[Fillable(['name', 'email', 'password', 'role', 'is_active', 'acceso_pqr', 'acceso_ea', 'acceso_reuniones'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -27,6 +27,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'acceso_pqr' => 'boolean',
+            'acceso_ea' => 'boolean',
+            'acceso_reuniones' => 'boolean',
         ];
     }
 
@@ -34,4 +37,20 @@ class User extends Authenticatable
     {
         return $this->role === 'master';
     }
+
+    public function tieneAccesoPqr(): bool
+    {
+        return $this->isMaster() || (bool) $this->acceso_pqr;
+    }
+
+    public function tieneAccesoEa(): bool
+    {
+        return $this->isMaster() || (bool) $this->acceso_ea;
+    }
+
+    public function tieneAccesoReuniones(): bool
+    {
+        return $this->isMaster() || (bool) $this->acceso_reuniones;
+    }
+
 }
