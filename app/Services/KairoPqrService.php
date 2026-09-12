@@ -61,7 +61,7 @@ class KairoPqrService
         // sudo con una regla restringida en /etc/sudoers.d/kairo-pqr-openclaw que
         // SOLO permite ejecutar este comando exacto, nada mas de /root.
         $inicio = microtime(true);
-        $sessionKey = 'agent:main:pqr-'.Str::uuid();
+        $sessionKey = 'agent:pqr:analysis-'.Str::uuid();
         $resultados = [];
         $fragmentosProcesados = 1;
 
@@ -200,7 +200,7 @@ class KairoPqrService
         try {
             return Process::timeout($timeoutSegundos)->run([
                 'sudo', '-H', '-u', 'root', 'openclaw', 'agent',
-                '--agent', 'main',
+                '--agent', 'pqr',
                 '--session-key', $sessionKey,
                 '--thinking', 'off',
                 '--timeout', (string) $timeoutSegundos,

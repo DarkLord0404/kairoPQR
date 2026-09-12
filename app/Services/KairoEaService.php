@@ -41,7 +41,7 @@ class KairoEaService
             .($historia !== null && $historia !== '' ? $historia : '(No se suministraron registros clínicos adicionales)');
 
         $inicio = microtime(true);
-        $sessionKey = 'agent:main:ea-'.Str::uuid();
+        $sessionKey = 'agent:ea:analysis-'.Str::uuid();
         $resultados = [];
         $fragmentosProcesados = 1;
 
@@ -98,7 +98,7 @@ class KairoEaService
     {
         $result = Process::timeout($timeoutSegundos)->run([
             'sudo', '-H', '-u', 'root',
-            'openclaw', 'agent', '--agent', 'main',
+            'openclaw', 'agent', '--agent', 'ea',
             '--session-key', $sessionKey,
             '--thinking', 'off',
             '--message', $mensaje,
