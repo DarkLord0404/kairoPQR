@@ -26,6 +26,19 @@
         </x-dropdown>
     </div>
 
+    @if ($analysis->tokens_totales !== null || $analysis->duracion_segundos)
+        <div class="kairo-panel p-3 mb-5 text-xs flex flex-wrap gap-x-4 gap-y-1" style="color: var(--kairo-text-dim)">
+            @if ($analysis->tokens_totales !== null)<span><strong>Tokens procesados:</strong> {{ number_format($analysis->tokens_totales, 0, ',', '.') }}</span>@endif
+            @if ($analysis->tokens_entrada !== null)<span>Entrada: {{ number_format($analysis->tokens_entrada, 0, ',', '.') }}</span>@endif
+            @if ($analysis->tokens_salida !== null)<span>Salida: {{ number_format($analysis->tokens_salida, 0, ',', '.') }}</span>@endif
+            @if ($analysis->tokens_cache !== null)<span>Caché: {{ number_format($analysis->tokens_cache, 0, ',', '.') }}</span>@endif
+            @if ($analysis->modelo)<span>Modelo: {{ $analysis->modelo }}</span>@endif
+            @if ($analysis->llamadas_modelo)<span>Llamadas: {{ $analysis->llamadas_modelo }}</span>@endif
+            @if ($analysis->fragmentos && $analysis->fragmentos > 1)<span>Fragmentos: {{ $analysis->fragmentos }}</span>@endif
+            @if ($analysis->duracion_segundos)<span>Tiempo: {{ number_format($analysis->duracion_segundos, 1, ',', '.') }} s</span>@endif
+        </div>
+    @endif
+
     @if (session('status'))
         <div class="kairo-panel p-4 mb-4 text-sm" style="color:#6ee7b7;border:1px solid #064e3b;">
             {{ session('status') }}

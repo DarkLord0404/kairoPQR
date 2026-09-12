@@ -11,11 +11,31 @@ use Livewire\Component;
 class Analyzer extends Component
 {
     public string $caso = '';
+
     public string $historia = '';
+
     public bool $analizando = false;
+
     public ?int $resultadoId = null;
+
     public ?array $secciones = null;
+
     public ?float $duracionSegundos = null;
+
+    public ?int $tokensTotales = null;
+
+    public ?int $tokensEntrada = null;
+
+    public ?int $tokensSalida = null;
+
+    public ?int $tokensCache = null;
+
+    public ?string $modelo = null;
+
+    public ?int $llamadasModelo = null;
+
+    public ?int $fragmentos = null;
+
     public ?string $error = null;
 
     public function analizar(KairoEaService $service): void
@@ -28,6 +48,7 @@ class Analyzer extends Component
 
         if ($caso === '') {
             $this->error = 'Ingrese la descripción del caso antes de analizar.';
+
             return;
         }
 
@@ -44,12 +65,25 @@ class Analyzer extends Component
                 'clasificacion' => $resultado['clasificacion'],
                 'secciones' => $resultado['secciones'],
                 'tokens_totales' => $resultado['tokens_totales'],
+                'tokens_entrada' => $resultado['tokens_entrada'],
+                'tokens_salida' => $resultado['tokens_salida'],
+                'tokens_cache' => $resultado['tokens_cache'],
+                'modelo' => $resultado['modelo'],
+                'llamadas_modelo' => $resultado['llamadas_modelo'],
+                'fragmentos' => $resultado['fragmentos'],
                 'duracion_segundos' => $resultado['duracion_segundos'],
             ]);
 
             $this->resultadoId = $registro->id;
             $this->secciones = $resultado['secciones'];
             $this->duracionSegundos = $resultado['duracion_segundos'];
+            $this->tokensTotales = $resultado['tokens_totales'];
+            $this->tokensEntrada = $resultado['tokens_entrada'];
+            $this->tokensSalida = $resultado['tokens_salida'];
+            $this->tokensCache = $resultado['tokens_cache'];
+            $this->modelo = $resultado['modelo'];
+            $this->llamadasModelo = $resultado['llamadas_modelo'];
+            $this->fragmentos = $resultado['fragmentos'];
         } catch (\Throwable $e) {
             report($e);
             $this->error = 'No fue posible completar el análisis: '.$e->getMessage();
@@ -60,7 +94,9 @@ class Analyzer extends Component
 
     public function nuevoAnalisis(): void
     {
-        $this->reset(['caso', 'historia', 'resultadoId', 'secciones', 'error', 'duracionSegundos']);
+        $this->reset(['caso', 'historia', 'resultadoId', 'secciones', 'error', 'duracionSegundos',
+            'tokensTotales', 'tokensEntrada', 'tokensSalida', 'tokensCache', 'modelo',
+            'llamadasModelo', 'fragmentos']);
     }
 
     public function render()

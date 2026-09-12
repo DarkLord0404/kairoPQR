@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\PromptConfig;
+use Illuminate\Contracts\Process\ProcessResult;
 use Illuminate\Process\Exceptions\ProcessTimedOutException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
@@ -60,12 +62,16 @@ class KairoPqrService
         // SOLO permite ejecutar este comando exacto, nada mas de /root.
         $inicio = microtime(true);
         $sessionKey = 'agent:main:pqr-'.Str::uuid();
+        $resultados = [];
+        $fragmentosProcesados = 1;
 
         if (strlen($mensaje) <= self::MAX_ARG_BYTES) {
             $result = $this->llamarOpenClaw($sessionKey, $mensaje, self::TIMEOUT_FINAL_SEGUNDOS);
+            $resultados[] = $result;
         } else {
             $fragmentos = $this->dividirEnFragmentos($mensaje, self::MAX_ARG_BYTES);
             $total = count($fragmentos);
+            $fragmentosProcesados = $total;
             $result = null;
 
             foreach ($fragmentos as $i => $fragmento) {
@@ -81,6 +87,7 @@ class KairoPqrService
                     $envio,
                     $esUltimo ? self::TIMEOUT_FINAL_SEGUNDOS : self::TIMEOUT_FRAGMENTO_SEGUNDOS
                 );
+                $resultados[] = $result;
 
                 if ($result->failed()) {
                     break;
@@ -120,7 +127,7 @@ class KairoPqrService
         }
 
         $secciones = $this->parseSecciones($texto);
-        $usage = $resultado['meta']['agentMeta']['usage'] ?? null;
+        $metricas = $this->agregarMetricas($resultados);
 
         $clasificacion = $this->extraerClasificacion($secciones['ALERTAS INTERNAS'] ?? '');
         if (isset($secciones['ALERTAS INTERNAS'])) {
@@ -139,12 +146,56 @@ class KairoPqrService
                 $secciones['ALERTAS INTERNAS'] ?? '', 'REVISION JURIDICA', ignoreCase: true
             ),
             'clasificacion' => $clasificacion,
-            'tokens_totales' => $usage['total'] ?? null,
+            ...$metricas,
+            'llamadas_modelo' => count($resultados),
+            'fragmentos' => $fragmentosProcesados,
             'duracion_segundos' => round(microtime(true) - $inicio, 2),
         ];
     }
 
-    private function llamarOpenClaw(string $sessionKey, string $mensaje, int $timeoutSegundos): \Illuminate\Contracts\Process\ProcessResult
+    /** @param array<int, ProcessResult> $resultados */
+    private function agregarMetricas(array $resultados): array
+    {
+        $totales = ['input' => 0, 'output' => 0, 'cache' => 0, 'total' => 0];
+        $modelo = null;
+        $encontroUso = false;
+
+        foreach ($resultados as $result) {
+            if (! preg_match('/\{.*\}/s', $result->output(), $matches)) {
+                continue;
+            }
+
+            $data = json_decode($matches[0], true);
+            if (! is_array($data)) {
+                continue;
+            }
+
+            $respuesta = $data['result'] ?? $data;
+            $meta = $respuesta['meta']['agentMeta'] ?? [];
+            $usage = $meta['usage'] ?? [];
+            $modelo ??= $meta['model'] ?? $respuesta['model'] ?? null;
+
+            if (! is_array($usage) || $usage === []) {
+                continue;
+            }
+
+            $encontroUso = true;
+            $totales['input'] += (int) ($usage['input'] ?? $usage['inputTokens'] ?? 0);
+            $totales['output'] += (int) ($usage['output'] ?? $usage['outputTokens'] ?? 0);
+            $totales['cache'] += (int) ($usage['cacheRead'] ?? 0) + (int) ($usage['cacheWrite'] ?? 0);
+            $totales['total'] += (int) ($usage['total'] ?? $usage['totalTokens'] ?? 0);
+        }
+
+        return [
+            'tokens_entrada' => $encontroUso ? $totales['input'] : null,
+            'tokens_salida' => $encontroUso ? $totales['output'] : null,
+            'tokens_cache' => $encontroUso ? $totales['cache'] : null,
+            'tokens_totales' => $encontroUso ? $totales['total'] : null,
+            'modelo' => $modelo,
+        ];
+    }
+
+    private function llamarOpenClaw(string $sessionKey, string $mensaje, int $timeoutSegundos): ProcessResult
     {
         try {
             return Process::timeout($timeoutSegundos)->run([
@@ -268,7 +319,7 @@ class KairoPqrService
         $normalizado = preg_replace('/\*{1,3}([^*\n]+)\*{1,3}/', '$1', $texto);
         $escaped = array_map(fn ($s) => preg_quote($s, '/'), $keys);
         // Case-insensitive match, optional trailing colon/spaces
-        $pattern = '/(?:^|\n)[ \t]*(' . implode('|', $escaped) . ')[ \t]*:?[ \t]*(?:\n|$)/im';
+        $pattern = '/(?:^|\n)[ \t]*('.implode('|', $escaped).')[ \t]*:?[ \t]*(?:\n|$)/im';
         $parts = array_values(array_filter(
             preg_split($pattern, $normalizado, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY),
             'trim'
@@ -283,15 +334,16 @@ class KairoPqrService
                 $current = $keys[$idx];
                 $result[$current] = '';
             } elseif ($current !== null) {
-                $result[$current] = trim($result[$current] . "\n" . $part);
+                $result[$current] = trim($result[$current]."\n".$part);
             }
         }
+
         return $result;
     }
 
     private function systemPrompt(): string
     {
-        return \App\Models\PromptConfig::obtener('pqr') ?? $this->defaultPrompt();
+        return PromptConfig::obtener('pqr') ?? $this->defaultPrompt();
     }
 
     private function defaultPrompt(): string

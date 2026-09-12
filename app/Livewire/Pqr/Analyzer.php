@@ -22,6 +22,18 @@ class Analyzer extends Component
 
     public ?int $tokensTotales = null;
 
+    public ?int $tokensEntrada = null;
+
+    public ?int $tokensSalida = null;
+
+    public ?int $tokensCache = null;
+
+    public ?string $modelo = null;
+
+    public ?int $llamadasModelo = null;
+
+    public ?int $fragmentos = null;
+
     public ?float $duracionSegundos = null;
 
     public ?string $error = null;
@@ -55,12 +67,24 @@ class Analyzer extends Component
                 'es_queja_valida' => $resultado['es_queja_valida'],
                 'secciones' => $resultado['secciones'],
                 'tokens_totales' => $resultado['tokens_totales'],
+                'tokens_entrada' => $resultado['tokens_entrada'],
+                'tokens_salida' => $resultado['tokens_salida'],
+                'tokens_cache' => $resultado['tokens_cache'],
+                'modelo' => $resultado['modelo'],
+                'llamadas_modelo' => $resultado['llamadas_modelo'],
+                'fragmentos' => $resultado['fragmentos'],
                 'duracion_segundos' => $resultado['duracion_segundos'],
             ]);
 
             $this->resultadoId = $registro->id;
             $this->secciones = $resultado['secciones'];
             $this->tokensTotales = $resultado['tokens_totales'];
+            $this->tokensEntrada = $resultado['tokens_entrada'];
+            $this->tokensSalida = $resultado['tokens_salida'];
+            $this->tokensCache = $resultado['tokens_cache'];
+            $this->modelo = $resultado['modelo'];
+            $this->llamadasModelo = $resultado['llamadas_modelo'];
+            $this->fragmentos = $resultado['fragmentos'];
             $this->duracionSegundos = $resultado['duracion_segundos'];
         } catch (\Throwable $e) {
             report($e);
@@ -72,7 +96,9 @@ class Analyzer extends Component
 
     public function nuevoAnalisis(): void
     {
-        $this->reset(['queja', 'historia', 'resultadoId', 'secciones', 'error', 'tokensTotales', 'duracionSegundos']);
+        $this->reset(['queja', 'historia', 'resultadoId', 'secciones', 'error', 'tokensTotales',
+            'tokensEntrada', 'tokensSalida', 'tokensCache', 'modelo', 'llamadasModelo',
+            'fragmentos', 'duracionSegundos']);
     }
 
     public function render()

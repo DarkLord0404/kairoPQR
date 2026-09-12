@@ -39,15 +39,22 @@
                 <button wire:click="nuevoAnalisis" class="ml-auto text-xs font-medium underline" style="color: var(--kairo-text-dim)">Nuevo analisis</button>
             </div>
 
-            @if ($tokensTotales || $duracionSegundos)
-                <div class="text-xs flex gap-4" style="color: var(--kairo-text-dim)">
+            @if ($tokensTotales !== null || $duracionSegundos)
+                <div class="kairo-panel p-3 text-xs flex flex-wrap gap-x-4 gap-y-1" style="color: var(--kairo-text-dim)">
                     @if ($tokensTotales)
-                        <span>Tokens consumidos en esta consulta: {{ number_format($tokensTotales, 0, ',', '.') }}</span>
+                        <span><strong>Tokens procesados:</strong> {{ number_format($tokensTotales, 0, ',', '.') }}</span>
                     @endif
+                    @if ($tokensEntrada !== null)<span>Entrada: {{ number_format($tokensEntrada, 0, ',', '.') }}</span>@endif
+                    @if ($tokensSalida !== null)<span>Salida: {{ number_format($tokensSalida, 0, ',', '.') }}</span>@endif
+                    @if ($tokensCache !== null)<span>Caché: {{ number_format($tokensCache, 0, ',', '.') }}</span>@endif
+                    @if ($modelo)<span>Modelo: {{ $modelo }}</span>@endif
+                    @if ($llamadasModelo)<span>Llamadas: {{ $llamadasModelo }}</span>@endif
+                    @if ($fragmentos && $fragmentos > 1)<span>Fragmentos: {{ $fragmentos }}</span>@endif
                     @if ($duracionSegundos)
                         <span>Tiempo de respuesta: {{ number_format($duracionSegundos, 1, ',', '.') }} s</span>
                     @endif
                 </div>
+                <div class="text-[11px] mt-1" style="color: var(--kairo-text-dim)">Métrica informativa de OpenClaw; no representa un cobro de API.</div>
             @endif
 
             @php
