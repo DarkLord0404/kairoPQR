@@ -1,15 +1,16 @@
 <?php
 
 use App\Http\Controllers\ExtractTextController;
-use App\Livewire\Configuracion\Prompts;
-use App\Livewire\Meetings\Cuentas as MeetingCuentas;
 use App\Http\Controllers\GoogleOAuthController;
 use App\Http\Controllers\MeetingFileController;
 use App\Livewire\AcercaDe;
+use App\Livewire\Configuracion\Consumo;
+use App\Livewire\Configuracion\Prompts;
 use App\Livewire\Ea\Analyzer as EaAnalyzer;
 use App\Livewire\Ea\Detalle as EaDetalle;
 use App\Livewire\Ea\HistoryList as EaHistoryList;
 use App\Livewire\Meetings\Conectar as ReunionConectar;
+use App\Livewire\Meetings\Cuentas as MeetingCuentas;
 use App\Livewire\Meetings\Detalle as ReunionDetalle;
 use App\Livewire\Meetings\Listado as ReunionListado;
 use App\Livewire\Pqr\Analyzer;
@@ -70,6 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('extraer-texto', ExtractTextController::class)->middleware(['acceso.pqr'])->name('extraer.texto');
 
     Route::get('configuracion/prompts', Prompts::class)->middleware(['master'])->name('configuracion.prompts');
+    Route::get('configuracion/consumo', Consumo::class)->middleware(['master'])->name('configuracion.consumo');
     Route::get('acerca-de', AcercaDe::class)->name('acerca-de');
 
     Route::view('profile', 'profile')->name('profile');

@@ -156,6 +156,10 @@ new class extends Component
                                    class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('configuracion.prompts') ? 'kairo-navlink-active' : '' }}">
                                     Prompts del sistema
                                 </a>
+                                <a href="{{ route('configuracion.consumo') }}" wire:navigate @click="cfg=false"
+                                   class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('configuracion.consumo') ? 'kairo-navlink-active' : '' }}">
+                                    Consumo de OpenClaw
+                                </a>
                             </div>
                         </div>
                     @endif
@@ -262,6 +266,9 @@ new class extends Component
                 </a>
                 <a href="{{ route('configuracion.prompts') }}" wire:navigate class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('configuracion.*') ? 'kairo-navlink-active' : '' }}">
                     Prompts del sistema
+                </a>
+                <a href="{{ route('configuracion.consumo') }}" wire:navigate class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('configuracion.consumo') ? 'kairo-navlink-active' : '' }}">
+                    Consumo de OpenClaw
                 </a>
             @endif
         </div>
