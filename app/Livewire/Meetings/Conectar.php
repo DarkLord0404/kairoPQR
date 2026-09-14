@@ -9,11 +9,12 @@ use Livewire\Component;
 class Conectar extends Component
 {
     public string $url = '';
+
     public string $titulo = '';
+
     public string $error = '';
 
-    // Estado actual del bot (null = libre, array = en reunión)
-    public ?array $reunionActual = null;
+    public array $reunionesActivas = [];
 
     public function mount(): void
     {
@@ -28,28 +29,23 @@ class Conectar extends Component
 
     private function actualizarEstado(): void
     {
-        $raw = shell_exec('/usr/bin/pgrep -u kairo -af "runner.py" 2>/dev/null') ?? '';
-
-        foreach (explode("\n", trim($raw)) as $line) {
-            if (!str_contains($line, 'meet.google.com')) {
+        $this->reunionesActivas = [];
+        foreach (glob('/run/kairo/meet-sessions/*.json') ?: [] as $path) {
+            $data = json_decode((string) @file_get_contents($path), true);
+            if (! is_array($data) || ! isset($data['session_id'], $data['pid'], $data['url'])) {
                 continue;
             }
-            // Línea ejemplo: "12345 /opt/kairomeet/venv/bin/python /opt/kairomeet/runner.py https://... --titulo Titulo"
-            if (preg_match(
-                '/^(\d+)\s+\S+\s+\S+runner\.py\s+(https:\/\/meet\.google\.com\/[a-z0-9\-]+)(?:\s+--titulo\s+(.+))?$/i',
-                trim($line),
-                $m
-            )) {
-                $this->reunionActual = [
-                    'pid'    => $m[1],
-                    'url'    => $m[2],
-                    'titulo' => trim($m[3] ?? 'Manual'),
-                ];
-                return;
+            if (! is_dir('/proc/'.(int) $data['pid'])) {
+                continue;
             }
+            $this->reunionesActivas[] = [
+                'session_id' => $data['session_id'],
+                'pid' => $data['pid'],
+                'url' => $data['url'],
+                'titulo' => $data['titulo'] ?? 'Reunión',
+                'estado' => $data['estado'] ?? 'activa',
+            ];
         }
-
-        $this->reunionActual = null;
     }
 
     public function conectar(): void
@@ -59,19 +55,21 @@ class Conectar extends Component
         $this->error = '';
         $url = trim($this->url);
 
-        if (!preg_match('/^https:\/\/meet\.google\.com\/[a-z0-9][a-z0-9\-]+[a-z0-9]$/i', $url)) {
+        if (! preg_match('/^https:\/\/meet\.google\.com\/[a-z0-9][a-z0-9\-]+[a-z0-9]$/i', $url)) {
             $this->error = 'URL inválida. Formato esperado: https://meet.google.com/xxx-xxxx-xxx';
+
             return;
         }
 
         $this->actualizarEstado();
-        if ($this->reunionActual !== null) {
-            $this->error = 'Kairo ya está en la reunión "' . e($this->reunionActual['titulo']) . '". Desconéctalo primero.';
+        if (collect($this->reunionesActivas)->contains('url', $url)) {
+            $this->error = 'Kairo ya está conectado a este enlace.';
+
             return;
         }
 
         $titulo = trim($this->titulo) ?: 'Manual';
-        exec('sudo -u kairo /opt/kairomeet/kairo-join.sh ' . escapeshellarg($url) . ' ' . escapeshellarg($titulo) . ' 2>/dev/null');
+        exec('sudo -u kairo /opt/kairomeet/kairo-join.sh '.escapeshellarg($url).' '.escapeshellarg($titulo).' 2>/dev/null');
 
         $this->url = '';
         $this->titulo = '';
@@ -82,10 +80,11 @@ class Conectar extends Component
         $this->actualizarEstado();
     }
 
-    public function desconectar(): void
+    public function desconectar(string $sessionId): void
     {
         abort_unless(auth()->user()?->isMaster(), 403);
-        exec('sudo -u kairo /opt/kairomeet/kairo-disconnect.sh 2>/dev/null');
+        abort_unless((bool) preg_match('/^[a-f0-9]{8}$/', $sessionId), 422);
+        exec('sudo -u kairo /opt/kairomeet/kairo-disconnect.sh '.escapeshellarg($sessionId).' 2>/dev/null');
         usleep(600000);
         $this->actualizarEstado();
     }

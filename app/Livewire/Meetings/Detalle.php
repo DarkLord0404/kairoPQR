@@ -52,12 +52,14 @@ class Detalle extends Component
 
         if ($validated->fails()) {
             $this->mensajeEnvio = '❌ '.$validated->errors()->first('email');
+
             return;
         }
 
         $acta = $this->getActaTexto();
         if (! $acta) {
             $this->mensajeEnvio = '❌ El acta no está disponible.';
+
             return;
         }
 
@@ -96,8 +98,18 @@ class Detalle extends Component
 
         $titulo = $meeting->titulo;
         $dir = $this->rutaSalidas();
-        foreach (glob($dir.'/'.$meeting->base_path.'*') as $archivo) {
-            @unlink($archivo);
+        $sessionPath = $dir.'/'.$meeting->base_path;
+        if (is_dir($sessionPath)) {
+            foreach (glob($sessionPath.'/*') ?: [] as $archivo) {
+                if (is_file($archivo)) {
+                    @unlink($archivo);
+                }
+            }
+            @rmdir($sessionPath);
+        } else {
+            foreach (glob($sessionPath.'*') ?: [] as $archivo) {
+                @unlink($archivo);
+            }
         }
 
         $meeting->delete();

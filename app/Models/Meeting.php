@@ -41,6 +41,17 @@ class Meeting extends Model
     public function archivosAudio(): array
     {
         $dir = config('kairomeet.salidas_path');
+        $sessionDir = $dir.'/'.$this->base_path;
+        if (is_dir($sessionDir)) {
+            $segmentados = glob($sessionDir.'/audio_part*.wav') ?: [];
+            $archivos = $segmentados !== []
+                ? $segmentados
+                : (is_file($sessionDir.'/audio.wav') ? [$sessionDir.'/audio.wav'] : []);
+            sort($archivos);
+
+            return $archivos;
+        }
+
         $patron = $this->num_segmentos > 1
             ? $dir.'/'.$this->base_path.'_part*.wav'
             : $dir.'/'.$this->base_path.'.wav';

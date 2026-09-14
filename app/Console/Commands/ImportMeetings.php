@@ -50,6 +50,12 @@ class ImportMeetings extends Command
             $bases[$nombre] = true;
         }
 
+        // Formato aislado: una carpeta por sesión. Solo se importa cuando el
+        // runner publica la marca atómica COMPLETADA.
+        foreach (glob($dir.'/*/COMPLETADA') ?: [] as $marker) {
+            $bases[basename(dirname($marker))] = true;
+        }
+
         $bases = array_keys($bases);
         sort($bases);
 
@@ -59,11 +65,15 @@ class ImportMeetings extends Command
     private function importarBase(string $dir, string $base): void
     {
         $basePath = $dir.'/'.$base;
+        $esCarpeta = is_dir($basePath);
 
-        $segmentos = glob($basePath.'_part*.wav');
+        $segmentos = $esCarpeta
+            ? (glob($basePath.'/audio_part*.wav') ?: [])
+            : (glob($basePath.'_part*.wav') ?: []);
         sort($segmentos);
         $esSegmentado = count($segmentos) > 0;
-        $wavsParaDuracion = $esSegmentado ? $segmentos : (file_exists($basePath.'.wav') ? [$basePath.'.wav'] : []);
+        $audioUnico = $esCarpeta ? $basePath.'/audio.wav' : $basePath.'.wav';
+        $wavsParaDuracion = $esSegmentado ? $segmentos : (file_exists($audioUnico) ? [$audioUnico] : []);
 
         if (empty($wavsParaDuracion)) {
             $this->warn("Sin audio para {$base}, se omite.");
@@ -74,9 +84,9 @@ class ImportMeetings extends Command
         $fechaInicio = $this->fechaDesdeBase($base);
         $duracion = $this->duracionTotal($wavsParaDuracion);
 
-        $transPath = $basePath.'.transcripcion.txt';
-        $actaLlmPath = $basePath.'.acta-llm.md';
-        $actaPath = $basePath.'.acta.md';
+        $transPath = $esCarpeta ? $basePath.'/transcripcion.txt' : $basePath.'.transcripcion.txt';
+        $actaLlmPath = $esCarpeta ? $basePath.'/acta-llm.md' : $basePath.'.acta-llm.md';
+        $actaPath = $esCarpeta ? $basePath.'/acta.md' : $basePath.'.acta.md';
 
         $tieneTranscripcion = file_exists($transPath);
         $actaFinal = match (true) {
@@ -104,8 +114,8 @@ class ImportMeetings extends Command
                 'fecha_fin' => $duracion ? $fechaInicio->copy()->addSeconds((int) $duracion) : null,
                 'duracion_segundos' => $duracion,
                 'num_segmentos' => $esSegmentado ? count($segmentos) : 1,
-                'transcripcion_path' => $tieneTranscripcion ? basename($transPath) : null,
-                'acta_path' => $actaFinal ? basename($actaFinal) : null,
+                'transcripcion_path' => $tieneTranscripcion ? $this->rutaRelativa($dir, $transPath) : null,
+                'acta_path' => $actaFinal ? $this->rutaRelativa($dir, $actaFinal) : null,
                 'estado' => $estado,
             ]
         );
@@ -116,6 +126,11 @@ class ImportMeetings extends Command
         $this->line("[{$etiqueta}] {$base} ({$estado})");
     }
 
+    private function rutaRelativa(string $dir, string $path): string
+    {
+        return ltrim(str_replace('\\', '/', substr($path, strlen(rtrim($dir, '/')))), '/');
+    }
+
     /**
      * Lee {base}.hablantes.json (muestras cada ~15s de quien hablaba, segun
      * la interfaz de Meet) y calcula el porcentaje de interaccion de cada
@@ -124,7 +139,7 @@ class ImportMeetings extends Command
      */
     private function importarHablantes(string $basePath, Meeting $meeting): void
     {
-        $path = $basePath.'.hablantes.json';
+        $path = is_dir($basePath) ? $basePath.'/hablantes.json' : $basePath.'.hablantes.json';
 
         if (! file_exists($path)) {
             return;
@@ -176,7 +191,7 @@ class ImportMeetings extends Command
      */
     private function organizadorDesdeArchivo(string $basePath): ?string
     {
-        $path = $basePath.'.organizador.txt';
+        $path = is_dir($basePath) ? $basePath.'/organizador.txt' : $basePath.'.organizador.txt';
         if (! file_exists($path)) {
             return null;
         }

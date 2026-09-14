@@ -13,14 +13,9 @@ class MeetingFileController extends Controller
      */
     public function audio(Meeting $meeting, int $segmento = 0): BinaryFileResponse
     {
-        $dir = config('kairomeet.salidas_path');
-        $base = $dir.'/'.$meeting->base_path;
+        $path = $meeting->archivosAudio()[$segmento] ?? null;
 
-        $path = $meeting->num_segmentos > 1
-            ? sprintf('%s_part%03d.wav', $base, $segmento)
-            : $base.'.wav';
-
-        abort_unless(is_file($path), 404);
+        abort_unless($path && is_file($path), 404);
 
         return response()->file($path, [
             'Content-Type' => 'audio/wav',
