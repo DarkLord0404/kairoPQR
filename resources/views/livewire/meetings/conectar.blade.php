@@ -47,6 +47,30 @@
         @endif
     </div>
 
+    @if ($colasProcesamiento)
+        <div class="rounded-xl p-4 space-y-3"
+             style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.25)">
+            <div class="text-sm font-bold" style="color:#fbbf24">Procesamiento pendiente</div>
+            @foreach ($colasProcesamiento as $trabajo)
+                @php
+                    $etiqueta = match ($trabajo['fase']) {
+                        'pending_groq' => 'En cola para transcripción',
+                        'transcribing_groq' => 'Transcribiendo con Groq',
+                        'waiting_groq' => 'Groq no disponible · reintentará automáticamente',
+                        'pending_openai' => 'En cola para preparar el acta',
+                        'processing_openai' => 'Preparando el acta',
+                        'waiting_openai' => 'OpenAI no disponible · reintentará automáticamente',
+                        default => 'Procesamiento pendiente',
+                    };
+                @endphp
+                <div class="flex items-center justify-between gap-3 text-xs">
+                    <span class="truncate" style="color:var(--kairo-text)">{{ $trabajo['titulo'] }}</span>
+                    <span class="text-right" style="color:#fbbf24">{{ $etiqueta }}</span>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     {{-- Formulario de conexión --}}
     <div class="kairo-panel p-5 space-y-4">
         <div class="flex items-center gap-2 pb-3" style="border-bottom: 1px solid var(--kairo-border)">

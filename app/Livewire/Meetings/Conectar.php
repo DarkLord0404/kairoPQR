@@ -16,6 +16,8 @@ class Conectar extends Component
 
     public array $reunionesActivas = [];
 
+    public array $colasProcesamiento = [];
+
     public function mount(): void
     {
         abort_unless(auth()->user()?->isMaster(), 403);
@@ -44,6 +46,19 @@ class Conectar extends Component
                 'url' => $data['url'],
                 'titulo' => $data['titulo'] ?? 'Reunión',
                 'estado' => $data['estado'] ?? 'activa',
+            ];
+        }
+
+        $this->colasProcesamiento = [];
+        foreach (glob(config('kairomeet.salidas_path').'/*/queue-state.json') ?: [] as $path) {
+            $state = json_decode((string) @file_get_contents($path), true);
+            $metadata = json_decode((string) @file_get_contents(dirname($path).'/session.json'), true);
+            if (! is_array($state) || ! is_array($metadata) || ($state['phase'] ?? '') === 'completed') {
+                continue;
+            }
+            $this->colasProcesamiento[] = [
+                'titulo' => $metadata['titulo'] ?? 'Reunión',
+                'fase' => $state['phase'] ?? 'pending_groq',
             ];
         }
     }

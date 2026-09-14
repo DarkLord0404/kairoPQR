@@ -12,10 +12,6 @@ from pathlib import Path
 import config
 from audio import SessionAudio
 from meet import unirse
-from transcribe import transcribir
-from actas import generar_actas
-from actas_llm import generar_acta_llm
-from notifier import enviar_acta
 import session_state
 
 
@@ -26,8 +22,6 @@ def main() -> None:
     ap.add_argument("--organizador", default="")
     args = ap.parse_args()
 
-    if not config.GROQ_API_KEY:
-        sys.exit("Falta GROQ_API_KEY en /opt/kairomeet/.env")
     if not Path(config.PROFILE_MASTER).exists():
         sys.exit(f"Perfil no existe: {config.PROFILE_MASTER}\nCorre vnc_login.sh primero.")
 
@@ -72,7 +66,7 @@ def main() -> None:
             al_estar_dentro=iniciar_grabacion,
             audio_sink=audio.sink,
         )
-        session_state.write(sid, estado="procesando")
+        session_state.write(sid, estado="guardando grabación")
     finally:
         audio.stop()
         shutil.rmtree(perfil, ignore_errors=True)
@@ -106,39 +100,6 @@ def main() -> None:
         print("[runner] No se encontraron segmentos de audio grabados.")
         return
 
-    print(f"[runner] Transcribiendo {len(segmentos)} segmento(s) con Groq...")
-    partes = []
-    for i, seg_path in enumerate(segmentos, start=1):
-        minuto_inicio = (i - 1) * 30
-        minuto_fin = i * 30
-        print(f"[runner] Segmento {i}/{len(segmentos)} ({os.path.basename(seg_path)})...")
-        texto_seg = transcribir(seg_path, config.GROQ_API_KEY,
-                                model=config.GROQ_STT_MODEL, idioma=config.IDIOMA)
-        etiqueta = f"--- Minuto {minuto_inicio}-{minuto_fin} (segmento {i}/{len(segmentos)}) ---"
-        partes.append(f"{etiqueta}\n{texto_seg}")
-
-    texto = "\n\n".join(partes)
-    trans_path = str(session_dir / "transcripcion.txt")
-    Path(trans_path).write_text(texto, encoding="utf-8")
-    print(f"[runner] Transcripción combinada: {len(texto)} caracteres "
-          f"de {len(segmentos)} segmento(s)")
-
-    if len(texto.strip()) < 50:
-        print("[runner] Advertencia: transcripción muy corta (posible audio en silencio).")
-
-    print("[runner] Generando acta con la suscripción de OpenAI (via OpenClaw)...")
-    fecha_str = f"{ahora:%Y-%m-%d %H:%M}"
-    try:
-        acta = generar_acta_llm(texto, titulo=args.titulo, fecha=fecha_str)
-        acta_path = str(session_dir / "acta-llm.md")
-    except Exception as e:
-        print(f"[runner] Fallo la suscripcion ({e}); usando Groq como respaldo...")
-        acta = generar_actas(texto, config.GROQ_API_KEY, model=config.GROQ_LLM_MODEL,
-                             titulo=args.titulo, fecha=fecha_str)
-        acta_path = str(session_dir / "acta.md")
-    Path(acta_path).write_text(acta, encoding="utf-8")
-    print(f"[runner] Acta guardada -> {acta_path}")
-
     metadata = {
         "session_id": sid,
         "base_path": base_name,
@@ -146,24 +107,25 @@ def main() -> None:
         "url": args.url,
         "organizador": args.organizador,
         "inicio": ahora.astimezone().isoformat(),
-        "estado": "completada",
+        "estado": "pendiente_groq",
         "segmentos": len(segmentos),
     }
     (session_dir / "session.json").write_text(
         json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    (session_dir / "COMPLETADA").touch()
-
-    print("[runner] Enviando correo...")
-    enviar_acta(
-        titulo=args.titulo,
-        fecha=f"{ahora:%Y-%m-%d %H:%M}",
-        acta_path=acta_path,
-        trans_path=trans_path,
-        organizador=args.organizador,
+    queue_state = {
+        "phase": "pending_groq",
+        "groq_attempts": 0,
+        "openai_attempts": 0,
+        "updated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+    }
+    queue_temp = session_dir / ".queue-state.tmp"
+    queue_temp.write_text(
+        json.dumps(queue_state, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-
-    print("[runner] Listo ✅")
+    os.replace(queue_temp, session_dir / "queue-state.json")
+    (session_dir / "GRABACION_COMPLETA").touch()
+    print(f"[runner] Grabación en cola para Groq -> {session_dir}")
     session_state.remove(sid)
 
 
