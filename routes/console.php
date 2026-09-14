@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('app:health-check')->everyThreeHours()->withoutOverlapping();
 Schedule::command('app:health-check --full')->dailyAt('05:15')->withoutOverlapping();
 Schedule::command('app:sync-meetings-to-cumple')->everyTenMinutes()->withoutOverlapping();
+Schedule::command('app:cleanup-audio')->dailyAt('02:30')->withoutOverlapping();

@@ -1,0 +1,4 @@
+www-data ALL=(root) NOPASSWD: /usr/local/sbin/kairo-openclaw-status
+www-data ALL=(root) NOPASSWD: /usr/local/sbin/kairo-openclaw-probe
+kairo ALL=(root) NOPASSWD: /usr/local/sbin/kairo-openclaw-status
+kairo ALL=(root) NOPASSWD: /usr/local/sbin/kairo-openclaw-probe

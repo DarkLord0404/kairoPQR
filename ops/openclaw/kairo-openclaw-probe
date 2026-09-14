@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+exec /usr/local/bin/openclaw agent \
+    --agent main \
+    --session-key agent:main:kairo-health-check \
+    --thinking off \
+    --timeout 30 \
+    --message 'Responde únicamente: KAIRO_OK'

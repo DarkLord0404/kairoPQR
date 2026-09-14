@@ -10,10 +10,10 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
 #[Signature('app:cleanup-audio')]
-#[Description('Avisa un dia antes y luego elimina el audio (.wav) de reuniones con mas de 30 dias, conservando siempre acta y transcripcion.')]
+#[Description('Avisa un día antes y elimina audios de reuniones con más de 7 días, conservando acta y transcripción.')]
 class CleanupAudio extends Command
 {
-    private const DIAS_RETENCION = 30;
+    private const DIAS_RETENCION = 7;
 
     /**
      * Cuentas institucionales propias del usuario; si el organizador de la
@@ -40,11 +40,13 @@ class CleanupAudio extends Command
 
     private function avisarProximasAEliminar(): void
     {
-        $limite = now()->subDays(self::DIAS_RETENCION - 1);
+        $desde = now()->subDays(self::DIAS_RETENCION);
+        $hasta = now()->subDays(self::DIAS_RETENCION - 1);
 
         $meetings = Meeting::whereNull('audio_aviso_enviado_en')
             ->whereNull('audio_eliminado_en')
-            ->where('fecha_inicio', '<=', $limite)
+            ->where('fecha_inicio', '>', $desde)
+            ->where('fecha_inicio', '<=', $hasta)
             ->get()
             ->filter(fn (Meeting $m) => $m->tieneAudio());
 

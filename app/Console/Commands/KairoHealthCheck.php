@@ -130,8 +130,8 @@ class KairoHealthCheck extends Command
         fclose($gateway);
 
         $status = Process::timeout(15)->run([
-            'sudo', '-H', '-u', 'root',
-            'openclaw', 'models', 'status', '--json',
+            'sudo', '-n', '-H', '-u', 'root',
+            '/usr/local/sbin/kairo-openclaw-status',
         ]);
         if (! $status->successful()) {
             return ['fallo', 'Gateway activo, pero OpenClaw no pudo validar su configuración: '.substr($status->errorOutput(), 0, 100)];
@@ -149,10 +149,8 @@ class KairoHealthCheck extends Command
         }
 
         $result = Process::timeout(30)->run([
-            'sudo', '-H', '-u', 'root',
-            'openclaw', 'agent', '--agent', 'main',
-            '--thinking', 'off',
-            '--message', 'Responde únicamente: KAIRO_OK',
+            'sudo', '-n', '-H', '-u', 'root',
+            '/usr/local/sbin/kairo-openclaw-probe',
         ]);
         if (! $result->successful() || trim($result->output()) === '') {
             return ['fallo', 'Sin respuesta — los análisis PQR y EA no funcionarán: '.substr($result->errorOutput(), 0, 100)];
