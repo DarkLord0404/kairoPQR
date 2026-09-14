@@ -34,6 +34,7 @@ class CleanupAudio extends Command
     {
         $this->avisarProximasAEliminar();
         $this->eliminarVencidas();
+        $this->eliminarAudiosHuerfanosHeredados();
 
         return self::SUCCESS;
     }
@@ -70,6 +71,40 @@ class CleanupAudio extends Command
             $peso = $meeting->audioPesaLegible();
             $meeting->eliminarAudio();
             $this->line("[eliminado] {$meeting->titulo} ({$peso} liberados)");
+        }
+    }
+
+    /**
+     * Las versiones antiguas guardaban los segmentos directamente en la raíz
+     * de "salidas". Algunos quedaron sin registro en la base de datos, por lo
+     * que no los alcanza la limpieza normal de reuniones.
+     */
+    private function eliminarAudiosHuerfanosHeredados(): void
+    {
+        $directorio = config('kairomeet.salidas_path');
+        $limite = now()->subDays(self::DIAS_RETENCION)->getTimestamp();
+
+        if (! is_dir($directorio)) {
+            return;
+        }
+
+        $reuniones = Meeting::all();
+
+        foreach (new \FilesystemIterator($directorio, \FilesystemIterator::SKIP_DOTS) as $archivo) {
+            if (! $archivo->isFile()
+                || ! in_array(strtolower($archivo->getExtension()), ['wav', 'flac'], true)
+                || $archivo->getMTime() > $limite) {
+                continue;
+            }
+
+            $ruta = $archivo->getPathname();
+            $estaVinculado = $reuniones->contains(
+                fn (Meeting $meeting) => in_array($ruta, $meeting->archivosAudio(), true)
+            );
+
+            if (! $estaVinculado && @unlink($ruta)) {
+                $this->line("[eliminado huérfano] {$archivo->getFilename()}");
+            }
         }
     }
 
