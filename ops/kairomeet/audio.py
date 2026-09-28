@@ -13,6 +13,8 @@ import glob
 import os
 import signal
 import subprocess
+import threading
+import time
 
 import config
 
@@ -31,12 +33,34 @@ def _pactl(*args) -> str:
 
 
 class SessionAudio:
-    def __init__(self, session_id: str, out_wav: str):
+    def __init__(self, session_id: str, out_wav: str, on_event=None):
         self.sink = f"meet_{session_id}"
         self.out_wav = out_wav
         self._module_id: str | None = None
         self._ff: subprocess.Popen | None = None
         self._patron_glob: str | None = None
+        self._on_event = on_event
+        self._last_size = 0
+        self._last_growth = time.time()
+        self._part_start = 0
+
+    def _event(self, kind: str, **data) -> None:
+        if self._on_event:
+            try:
+                self._on_event(kind, data)
+            except Exception:
+                pass
+
+    def _drain_stderr(self) -> None:
+        """Consume stderr para que ffmpeg nunca se bloquee y registra silencios."""
+        if not self._ff or not self._ff.stderr:
+            return
+        for raw in iter(self._ff.stderr.readline, ""):
+            line = raw.strip()
+            if "silence_start:" in line:
+                self._event("silence_detected", detail=line[-300:])
+            elif "silence_end:" in line:
+                self._event("audio_resumed", detail=line[-300:])
 
     def prepare(self) -> str:
         """Crea el null-sink aislado. El proceso Chrome debe recibir PULSE_SINK."""
@@ -54,16 +78,25 @@ class SessionAudio:
         base, ext = os.path.splitext(self.out_wav)
         patron_salida = f"{base}_part%03d{ext}"
         self._patron_glob = f"{base}_part*{ext}"
+        self._part_start = len(glob.glob(self._patron_glob))
 
         self._ff = subprocess.Popen(
-            ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            ["ffmpeg", "-y", "-hide_banner", "-loglevel", "info",
              "-f", "pulse", "-i", f"{self.sink}.monitor",
              "-ac", "1", "-ar", "16000",
+             "-af", "silencedetect=noise=-50dB:d=60",
              "-f", "segment", "-segment_time", str(SEGMENT_SECONDS),
+             "-segment_start_number", str(self._part_start),
              "-reset_timestamps", "1",
              patron_salida],
             env=_env(),
+            stderr=subprocess.PIPE,
+            text=True,
         )
+        threading.Thread(target=self._drain_stderr, daemon=True).start()
+        self._last_size = self.total_bytes()
+        self._last_growth = time.time()
+        self._event("recording_started", pid=self._ff.pid, part=self._part_start)
         print(f"[audio] Grabando {self.sink}.monitor -> {patron_salida} "
               f"(segmentos de {SEGMENT_SECONDS // 60} min)")
 
@@ -72,6 +105,32 @@ class SessionAudio:
         if not self._patron_glob:
             return []
         return sorted(glob.glob(self._patron_glob))
+
+    def total_bytes(self) -> int:
+        return sum(os.path.getsize(p) for p in self.segmentos() if os.path.exists(p))
+
+    def health(self) -> dict:
+        """Comprueba y recupera el grabador sin afectar el navegador/reunión."""
+        now = time.time()
+        size = self.total_bytes()
+        if size > self._last_size:
+            self._last_size = size
+            self._last_growth = now
+        alive = self._ff is not None and self._ff.poll() is None
+        restarted = False
+        if not alive:
+            self._event("recorder_stopped", bytes=size)
+            self.start_recording()
+            alive = True
+            restarted = True
+        stalled_for = max(0, int(now - self._last_growth))
+        if stalled_for >= 60:
+            self._event("recording_stalled", seconds=stalled_for, bytes=size)
+            self._last_growth = now  # una alerta por minuto, no una por latido
+        return {
+            "alive": alive, "restarted": restarted, "bytes": size,
+            "stalled_seconds": stalled_for,
+        }
 
     def stop(self) -> None:
         """Detiene la grabación y libera el sink."""
@@ -82,6 +141,7 @@ class SessionAudio:
             except subprocess.TimeoutExpired:
                 self._ff.kill()
             self._ff = None
+            self._event("recording_stopped_cleanly", bytes=self.total_bytes())
 
         if self._module_id:
             try:

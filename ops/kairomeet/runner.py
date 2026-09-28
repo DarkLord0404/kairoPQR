@@ -7,6 +7,7 @@ import os
 import shutil
 import sys
 import uuid
+import time
 from pathlib import Path
 
 import config
@@ -15,7 +16,7 @@ from meet import unirse
 import session_state
 
 
-def main() -> None:
+def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("url")
     ap.add_argument("--titulo", default="Reunión")
@@ -41,7 +42,20 @@ def main() -> None:
         except OSError:
             pass
 
-    audio = SessionAudio(sid, wav_path)
+    events_path = session_dir / "capture-events.jsonl"
+    capture_gaps: list[dict] = []
+    alerted: set[str] = set()
+
+    def audio_event(kind: str, data: dict) -> None:
+        event = {"type": kind, "at": dt.datetime.now(dt.timezone.utc).isoformat(), **data}
+        with events_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event, ensure_ascii=False) + "\n")
+        if kind in {"silence_detected", "recording_stalled", "recorder_stopped"}:
+            capture_gaps.append(event)
+            alerted.add(kind)
+        session_state.write(sid, audio_status=kind, capture_alerts=len(capture_gaps))
+
+    audio = SessionAudio(sid, wav_path, on_event=audio_event)
     audio.prepare()
     session_state.write(
         sid, pid=os.getpid(), url=args.url, titulo=args.titulo,
@@ -55,6 +69,14 @@ def main() -> None:
         audio.start_recording()
         session_state.write(sid, estado="grabando")
 
+    def latido(segundo: int) -> None:
+        health = audio.health()
+        session_state.write(
+            sid, estado="grabando", heartbeat_second=segundo,
+            audio_bytes=health["bytes"], audio_alive=health["alive"],
+            recorder_restarted=health["restarted"],
+        )
+
     entro = False
     muestras_hablante = []
     try:
@@ -64,6 +86,7 @@ def main() -> None:
             bot_nombre=config.BOT_NOMBRE,
             max_minutos=config.MAX_MINUTOS,
             al_estar_dentro=iniciar_grabacion,
+            al_latido=latido,
             audio_sink=audio.sink,
         )
         session_state.write(sid, estado="guardando grabación")
@@ -73,7 +96,7 @@ def main() -> None:
 
     if not entro:
         print("[runner] No se grabó nada (el bot no entró a la reunión).")
-        return
+        return 2
 
     if args.organizador:
         try:
@@ -98,7 +121,7 @@ def main() -> None:
 
     if not segmentos:
         print("[runner] No se encontraron segmentos de audio grabados.")
-        return
+        return 3
 
     metadata = {
         "session_id": sid,
@@ -109,6 +132,12 @@ def main() -> None:
         "inicio": ahora.astimezone().isoformat(),
         "estado": "pendiente_groq",
         "segmentos": len(segmentos),
+        "fin": dt.datetime.now().astimezone().isoformat(),
+        "capture_report": {
+            "status": "warning" if capture_gaps else "complete",
+            "alerts": capture_gaps,
+            "audio_bytes": sum(Path(p).stat().st_size for p in segmentos),
+        },
     }
     (session_dir / "session.json").write_text(
         json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -127,7 +156,8 @@ def main() -> None:
     (session_dir / "GRABACION_COMPLETA").touch()
     print(f"[runner] Grabación en cola para Groq -> {session_dir}")
     session_state.remove(sid)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

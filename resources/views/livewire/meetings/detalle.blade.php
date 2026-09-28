@@ -8,6 +8,14 @@
                 {{ $meeting->fecha_inicio?->translatedFormat('d \d\e F \d\e Y, h:i A') }}
                 @if($meeting->duracion_legible) &middot; {{ $meeting->duracion_legible }} @endif
             </p>
+            @if($meeting->capture_report)
+                <p class="text-xs mt-1" style="color:{{ ($meeting->capture_report['status'] ?? '') === 'complete' ? '#6ee7b7' : '#fbbf24' }}">
+                    Captura {{ ($meeting->capture_report['status'] ?? '') === 'complete' ? 'verificada sin interrupciones detectadas' : 'con posibles huecos' }}
+                    @if(!empty($meeting->capture_report['alerts']))
+                        · {{ count($meeting->capture_report['alerts']) }} alerta(s) registrada(s)
+                    @endif
+                </p>
+            @endif
         </div>
 
         <x-dropdown align="right" width="48" contentClasses="py-1 kairo-dropdown-panel">

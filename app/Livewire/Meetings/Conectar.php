@@ -46,6 +46,10 @@ class Conectar extends Component
                 'url' => $data['url'],
                 'titulo' => $data['titulo'] ?? 'Reunión',
                 'estado' => $data['estado'] ?? 'activa',
+                'audio_bytes' => (int) ($data['audio_bytes'] ?? 0),
+                'audio_alive' => $data['audio_alive'] ?? null,
+                'capture_alerts' => (int) ($data['capture_alerts'] ?? 0),
+                'heartbeat_second' => (int) ($data['heartbeat_second'] ?? 0),
             ];
         }
 

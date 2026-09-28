@@ -11,6 +11,7 @@ import ssl
 import subprocess
 import sys
 import time
+import os
 from pathlib import Path
 
 import requests
@@ -27,8 +28,14 @@ VENTANA_ATRAS = 30   # unirse si empezó hace hasta N minutos (invitaciones tard
 # Cubre reuniones donde el ICS recurrente omite el conferenceData.
 CACHE_PATH = Path(config.SALIDAS).parent / "upcoming_meetings.json"
 
-# URLs de reuniones ya despachadas en esta sesión (evita unirse dos veces)
-ya_unidos: set[str] = set()
+# Procesos despachados por este vigilante. Una reunión que falla puede
+# reintentarse sin bloquear para siempre su URL.
+procesos: dict[str, subprocess.Popen] = {}
+reintentos: dict[str, int] = {}
+completadas: set[str] = set()
+ultimo_intento: dict[str, float] = {}
+MAX_REINTENTOS = 5
+RETRY_SECONDS = 120
 # Rastrea estado de cada ICS: True = OK, False = en error (para no repetir alertas)
 estado_calendarios: dict[str, bool] = {}
 
@@ -142,15 +149,55 @@ def eventos_de_cache():
 
 
 def _lanzar(titulo: str, url: str, fuente: str = "ICS") -> None:
-    ya_unidos.add(url)
+    if url in _urls_activas():
+        return
+    if time.time() - ultimo_intento.get(url, 0) < RETRY_SECONDS:
+        return
     print(f"[watch] Reunión detectada ({fuente}): '{titulo}' -> {url}")
-    subprocess.Popen(
+    ultimo_intento[url] = time.time()
+    procesos[url] = subprocess.Popen(
         [VENV_PY, RUNNER, url, "--titulo", titulo],
-        env={**__import__("os").environ,
+        env={**os.environ,
              "DISPLAY": config.DISPLAY,
              "XDG_RUNTIME_DIR": config.XDG_RUNTIME_DIR},
         cwd=str(Path(config.SALIDAS).parent),
     )
+
+
+def _urls_activas() -> set[str]:
+    """Lee el registro compartido: funciona incluso tras reiniciar watch."""
+    urls = set()
+    for path in Path("/run/kairo/meet-sessions").glob("*.json"):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            pid = int(data.get("pid", 0))
+            if pid > 0 and Path(f"/proc/{pid}").exists() and data.get("url"):
+                urls.add(data["url"])
+        except Exception:
+            continue
+    return urls
+
+
+def _recolectar_procesos() -> None:
+    for url, process in list(procesos.items()):
+        code = process.poll()
+        if code is None:
+            continue
+        procesos.pop(url, None)
+        if code == 0:
+            completadas.add(url)
+            reintentos.pop(url, None)
+            print(f"[watch] Reunión finalizada normalmente: {url}")
+        else:
+            attempts = reintentos.get(url, 0) + 1
+            reintentos[url] = attempts
+            print(f"[watch] Entrada fallida ({attempts}/{MAX_REINTENTOS}): {url}")
+            if attempts >= MAX_REINTENTOS:
+                completadas.add(url)
+                _enviar_alerta(
+                    "⚠️ Kairo no pudo entrar a una reunión",
+                    f"Se agotaron {MAX_REINTENTOS} intentos para {url}.",
+                )
 
 
 def main() -> None:
@@ -162,11 +209,18 @@ def main() -> None:
 
     while True:
         try:
-            for titulo, url in eventos_proximos():
-                if url not in ya_unidos:
+            _recolectar_procesos()
+            eventos_ics = list(eventos_proximos())
+            eventos_cache = list(eventos_de_cache() or [])
+            visibles = {url for _, url in eventos_ics + eventos_cache}
+            # Una URL recurrente vuelve a ser elegible cuando sale de la
+            # ventana temporal; no queda bloqueada hasta reiniciar el servicio.
+            completadas.intersection_update(visibles | set(procesos))
+            for titulo, url in eventos_ics:
+                if url not in completadas and url not in procesos:
                     _lanzar(titulo, url, "ICS")
-            for titulo, url in eventos_de_cache():
-                if url not in ya_unidos:
+            for titulo, url in eventos_cache:
+                if url not in completadas and url not in procesos:
                     _lanzar(titulo, url, "cache-API")
         except Exception as e:
             print(f"[watch] Error inesperado en el bucle principal: {e}")

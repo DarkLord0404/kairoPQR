@@ -83,6 +83,14 @@ class ImportMeetings extends Command
 
         $fechaInicio = $this->fechaDesdeBase($base);
         $duracion = $this->duracionTotal($wavsParaDuracion);
+        $metadata = $esCarpeta ? $this->leerJson($basePath.'/session.json') : [];
+        if (! empty($metadata['inicio'])) {
+            try {
+                $fechaInicio = Carbon::parse($metadata['inicio']);
+            } catch (\Throwable) {
+                // El nombre de la carpeta sigue siendo la fuente segura.
+            }
+        }
 
         $transPath = $esCarpeta ? $basePath.'/transcripcion.txt' : $basePath.'.transcripcion.txt';
         $actaLlmPath = $esCarpeta ? $basePath.'/acta-llm.md' : $basePath.'.acta-llm.md';
@@ -102,13 +110,15 @@ class ImportMeetings extends Command
         };
 
         $titulo = $actaFinal ? $this->tituloDesdeActa($actaFinal) : null;
+        $titulo ??= $metadata['titulo'] ?? null;
         $organizador = $this->organizadorDesdeArchivo($basePath);
+        $organizador ??= $metadata['organizador'] ?? null;
 
         $meeting = Meeting::updateOrCreate(
             ['base_path' => $base],
             [
                 'titulo' => $titulo ?? 'Reunión',
-                'url_meet' => null,
+                'url_meet' => $metadata['url'] ?? null,
                 'organizador' => $organizador,
                 'fecha_inicio' => $fechaInicio,
                 'fecha_fin' => $duracion ? $fechaInicio->copy()->addSeconds((int) $duracion) : null,
@@ -117,6 +127,7 @@ class ImportMeetings extends Command
                 'transcripcion_path' => $tieneTranscripcion ? $this->rutaRelativa($dir, $transPath) : null,
                 'acta_path' => $actaFinal ? $this->rutaRelativa($dir, $actaFinal) : null,
                 'estado' => $estado,
+                'capture_report' => $metadata['capture_report'] ?? null,
             ]
         );
 
@@ -124,6 +135,19 @@ class ImportMeetings extends Command
 
         $etiqueta = $meeting->wasRecentlyCreated ? 'nueva' : 'actualizada';
         $this->line("[{$etiqueta}] {$base} ({$estado})");
+    }
+
+    private function leerJson(string $path): array
+    {
+        if (! is_file($path)) {
+            return [];
+        }
+        try {
+            $data = json_decode((string) file_get_contents($path), true, flags: JSON_THROW_ON_ERROR);
+            return is_array($data) ? $data : [];
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     private function rutaRelativa(string $dir, string $path): string

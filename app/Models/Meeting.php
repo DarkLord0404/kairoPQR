@@ -13,6 +13,7 @@ class Meeting extends Model
         'duracion_segundos', 'num_segmentos', 'transcripcion_path',
         'acta_path', 'estado', 'diarizada', 'audio_aviso_enviado_en', 'audio_eliminado_en',
         'cumple_synced_at', 'cumple_synced_hash', 'cumple_sync_error',
+        'capture_report',
     ];
 
     protected function casts(): array
@@ -24,6 +25,7 @@ class Meeting extends Model
             'audio_aviso_enviado_en' => 'datetime',
             'audio_eliminado_en' => 'datetime',
             'cumple_synced_at' => 'datetime',
+            'capture_report' => 'array',
         ];
     }
 

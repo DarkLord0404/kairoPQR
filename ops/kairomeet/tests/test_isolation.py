@@ -27,6 +27,18 @@ class AudioIsolationTest(unittest.TestCase):
             pactl.call_args_list,
         )
 
+    def test_health_restarts_only_the_failed_session_recorder(self):
+        session = audio.SessionAudio("abc12345", "/tmp/audio.wav")
+        session._ff = unittest.mock.Mock()
+        session._ff.poll.return_value = 1
+        with patch.object(session, "total_bytes", return_value=120), \
+             patch.object(session, "start_recording") as restart:
+            result = session.health()
+
+        restart.assert_called_once_with()
+        self.assertTrue(result["alive"])
+        self.assertTrue(result["restarted"])
+
 
 class SessionStateTest(unittest.TestCase):
     def test_state_updates_atomically_and_can_be_removed(self):

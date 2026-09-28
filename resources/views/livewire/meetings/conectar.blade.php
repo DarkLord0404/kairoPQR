@@ -25,6 +25,14 @@
                        style="color: var(--kairo-blue-dim)">
                         {{ $reunion['url'] }}
                     </a>
+                    @if($reunion['heartbeat_second'] > 0)
+                        <div class="text-xs mt-1" style="color:{{ $reunion['capture_alerts'] ? '#fbbf24' : '#6ee7b7' }}">
+                            Audio {{ $reunion['audio_alive'] === false ? 'interrumpido' : 'verificado' }} ·
+                            {{ intdiv($reunion['heartbeat_second'], 60) }} min capturados ·
+                            {{ round($reunion['audio_bytes'] / 1048576, 1) }} MB
+                            @if($reunion['capture_alerts']) · {{ $reunion['capture_alerts'] }} alerta(s) @endif
+                        </div>
+                    @endif
                 </div>
                 <button wire:click="desconectar('{{ $reunion['session_id'] }}')" wire:loading.attr="disabled" wire:target="desconectar"
                     class="flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-md whitespace-nowrap flex items-center gap-1.5"

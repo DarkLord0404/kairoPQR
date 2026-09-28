@@ -111,6 +111,7 @@ def _reunion_terminada(page, room_code: str) -> bool:
 def unirse(url: str, perfil_dir: str, bot_nombre: str,
            max_minutos: int,
            al_estar_dentro=None,
+           al_latido=None,
            audio_sink: str | None = None) -> tuple[bool, list[dict]]:
     """Se une a `url`. Llama `al_estar_dentro()` al confirmar entrada.
     Devuelve (entro, muestras_hablante). `muestras_hablante` es una lista de
@@ -221,6 +222,14 @@ def unirse(url: str, perfil_dir: str, bot_nombre: str,
             while True:
                 time.sleep(15)
                 elapsed = (time.time() - inicio) / 60
+
+                # El latido vigila el grabador; sus fallos nunca deben sacar al
+                # bot de la reunión ni interrumpir el navegador.
+                if al_latido:
+                    try:
+                        al_latido(int(time.time() - inicio))
+                    except Exception as e:
+                        print(f"[meet] Falló comprobación de audio (se continúa): {e}")
 
                 if not debug_volcado and elapsed >= 2:
                     _volcar_aria_labels_debug(page)
