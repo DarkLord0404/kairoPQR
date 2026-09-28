@@ -84,15 +84,38 @@ class Conectar extends Component
         }
 
         $titulo = trim($this->titulo) ?: 'Manual';
-        exec('sudo -u kairo /opt/kairomeet/kairo-join.sh '.escapeshellarg($url).' '.escapeshellarg($titulo).' 2>/dev/null');
+        $salida = [];
+        $codigo = 0;
+        exec('sudo -n -u kairo /opt/kairomeet/kairo-join.sh '.escapeshellarg($url).' '.escapeshellarg($titulo).' 2>&1', $salida, $codigo);
+
+        $arranque = explode('|', trim((string) end($salida)), 2);
+        $pid = isset($arranque[0]) && ctype_digit($arranque[0]) ? (int) $arranque[0] : 0;
+        if ($codigo !== 0 || $pid < 1) {
+            $this->error = 'Kairo no pudo iniciar. El intento quedó registrado para diagnóstico.';
+
+            return;
+        }
+
+        // El estado aparece apenas termina la preparación del perfil y del audio.
+        // Esperar unos segundos evita reportar éxito si el proceso murió al arrancar.
+        for ($intento = 0; $intento < 12; $intento++) {
+            usleep(500000);
+            $this->actualizarEstado();
+            if (collect($this->reunionesActivas)->contains('url', $url)) {
+                break;
+            }
+            if (! is_dir('/proc/'.$pid)) {
+                $this->error = 'Kairo no pudo preparar la conexión. Revisa el diagnóstico del intento.';
+
+                return;
+            }
+        }
 
         $this->url = '';
         $this->titulo = '';
-        $this->error = '';
-
-        // Pequeña pausa para que el proceso arranque antes del primer poll
-        usleep(800000);
-        $this->actualizarEstado();
+        $this->error = collect($this->reunionesActivas)->contains('url', $url)
+            ? ''
+            : 'Kairo sigue preparando la conexión. El estado se actualizará automáticamente.';
     }
 
     public function desconectar(string $sessionId): void
