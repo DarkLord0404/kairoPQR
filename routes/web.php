@@ -10,6 +10,7 @@ use App\Livewire\Ea\Analyzer as EaAnalyzer;
 use App\Livewire\Ea\Detalle as EaDetalle;
 use App\Livewire\Ea\HistoryList as EaHistoryList;
 use App\Livewire\Meetings\Conectar as ReunionConectar;
+use App\Livewire\Meetings\AcercaDe as ReunionAcercaDe;
 use App\Livewire\Meetings\Cuentas as MeetingCuentas;
 use App\Livewire\Meetings\Detalle as ReunionDetalle;
 use App\Livewire\Meetings\Listado as ReunionListado;
@@ -57,6 +58,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('reuniones/cuentas', MeetingCuentas::class)->middleware(['master'])->name('reuniones.cuentas');
 
     Route::get('reuniones/conectar', ReunionConectar::class)->middleware(['master'])->name('reuniones.conectar');
+
+    Route::get('reuniones/acerca-de', ReunionAcercaDe::class)->middleware(['master'])->name('reuniones.acerca-de');
 
     Route::get('reuniones/{meeting}', ReunionDetalle::class)
         ->middleware(['acceso.reuniones'])

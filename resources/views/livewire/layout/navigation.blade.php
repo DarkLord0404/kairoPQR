@@ -123,6 +123,10 @@ new class extends Component
                                        class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('reuniones.conectar') ? 'kairo-navlink-active' : '' }}">
                                         Conectar manualmente
                                     </a>
+                                    <a href="{{ route('reuniones.acerca-de') }}" wire:navigate @click="meet=false"
+                                       class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('reuniones.acerca-de') ? 'kairo-navlink-active' : '' }}">
+                                        Acerca de KairoMeet
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -255,6 +259,9 @@ new class extends Component
                     </a>
                     <a href="{{ route('reuniones.conectar') }}" wire:navigate class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('reuniones.conectar') ? 'kairo-navlink-active' : '' }}">
                         Conectar manualmente
+                    </a>
+                    <a href="{{ route('reuniones.acerca-de') }}" wire:navigate class="block px-4 py-2 text-sm kairo-navlink {{ request()->routeIs('reuniones.acerca-de') ? 'kairo-navlink-active' : '' }}">
+                        Acerca de KairoMeet
                     </a>
                 @endif
             @endif
