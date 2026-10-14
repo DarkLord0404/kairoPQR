@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 exec /usr/local/bin/openclaw agent \
-    --agent main \
-    --session-key agent:main:kairo-health-check \
-    --thinking off \
-    --timeout 30 \
+    --agent pqr \
+    --session-key "agent:pqr:kairo-health-check-$(date +%s%N)" \
+    --thinking low \
+    --timeout 45 \
     --message 'Responde únicamente: KAIRO_OK'
