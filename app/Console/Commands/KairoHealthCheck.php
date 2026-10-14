@@ -129,7 +129,9 @@ class KairoHealthCheck extends Command
         }
         fclose($gateway);
 
-        $status = Process::timeout(15)->run([
+        // Las versiones recientes de OpenClaw validan también sus almacenes
+        // SQLite y pueden tardar más de 15 s aun estando completamente sanas.
+        $status = Process::timeout(60)->run([
             'sudo', '-n', '-H', '-u', 'root',
             '/usr/local/sbin/kairo-openclaw-status',
         ]);
@@ -148,7 +150,7 @@ class KairoHealthCheck extends Command
             return ['ok', "Gateway y autenticación configurados · {$modelo} · sin consumir tokens del modelo"];
         }
 
-        $result = Process::timeout(30)->run([
+        $result = Process::timeout(60)->run([
             'sudo', '-n', '-H', '-u', 'root',
             '/usr/local/sbin/kairo-openclaw-probe',
         ]);
