@@ -202,7 +202,7 @@ class KairoPqrService
                 'sudo', '-H', '-u', 'root', 'openclaw', 'agent',
                 '--agent', 'pqr',
                 '--session-key', $sessionKey,
-                '--thinking', 'off',
+                '--thinking', 'low',
                 '--timeout', (string) $timeoutSegundos,
                 '--message', $mensaje,
                 '--json',

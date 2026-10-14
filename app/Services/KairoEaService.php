@@ -100,7 +100,7 @@ class KairoEaService
             'sudo', '-H', '-u', 'root',
             'openclaw', 'agent', '--agent', 'ea',
             '--session-key', $sessionKey,
-            '--thinking', 'off',
+            '--thinking', 'low',
             '--message', $mensaje,
             '--json',
         ]);
