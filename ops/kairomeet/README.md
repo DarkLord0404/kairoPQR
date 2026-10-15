@@ -83,8 +83,9 @@ varios segundos de diferencia. Nunca reemplazar ni reiniciar su FFmpeg.
 6. Copiar a `/opt/kairomeet` solo los módulos Python modificados, con propietario `kairo:kairo`.
 7. No reiniciar PulseAudio, Xvfb, Chrome, FFmpeg ni runners activos.
 8. Si cambió `watch.py`, reiniciar solo `kairo-watch` tras confirmar `KillMode=process`.
-9. Comparar PID y crecimiento del WAV antes y después.
-10. Verificar web, servicios, migraciones y logs.
+9. Si cambió `processor.py`, `actas_llm.py`, `transcriber.py` o `notifier.py`, reiniciar obligatoriamente el procesador afectado (`kairo-process@groq` o `kairo-process@openai`). Python conserva los módulos importados en memoria y, sin este reinicio, seguirá ejecutando la versión anterior aunque el archivo nuevo ya esté en disco. Las colas son persistentes, por lo que el trabajo pendiente se retoma sin perder audios ni transcripciones.
+10. Comparar PID y crecimiento del WAV antes y después.
+11. Verificar web, servicios, migraciones y logs.
 
 ## 7. Pruebas
 
