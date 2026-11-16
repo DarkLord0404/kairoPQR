@@ -23,7 +23,7 @@
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
               <tr>
                 <td width="48" style="vertical-align:middle;">
-                  <img src="https://app.koqoi.com/kairo.png" width="40" height="40" alt="Kairo"
+                  <img src="https://clara.koqoi.com/kairo.png" width="40" height="40" alt="Kairo"
                        style="border-radius:50%;border:2px solid #60a5fa;display:block;">
                 </td>
                 <td style="vertical-align:middle;padding-left:12px;">
@@ -49,7 +49,7 @@
 
             <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
             <div style="color:#9ca3af;font-size:12px;text-align:center;">
-              Generado automáticamente por KairoMeet &middot; <a href="https://app.koqoi.com/reuniones" style="color:#3b82f6;text-decoration:none;">Ver en Kairo</a>
+              Generado automáticamente por KairoMeet &middot; <a href="https://clara.koqoi.com/reuniones" style="color:#3b82f6;text-decoration:none;">Ver en Kairo</a>
             </div>
           </td>
         </tr>

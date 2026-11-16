@@ -11,7 +11,7 @@
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
               <tr>
                 <td width="48" style="vertical-align:middle;">
-                  <img src="https://app.koqoi.com/kairo.png" width="40" height="40" alt="Kairo"
+                  <img src="https://clara.koqoi.com/kairo.png" width="40" height="40" alt="Kairo"
                        style="border-radius:50%;border:2px solid #60a5fa;display:block;">
                 </td>
                 <td style="vertical-align:middle;padding-left:12px;">
