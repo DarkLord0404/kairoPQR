@@ -1,12 +1,6 @@
-<div class="max-w-5xl mx-auto space-y-3">
+<div class="w-full space-y-3">
 
-    <div class="kairo-intro kairo-panel flex items-start gap-4 p-5">
-        <img src="{{ asset('clara.webp') }}" alt="Clara" class="w-12 h-12 kairo-avatar-ring flex-shrink-0">
-        <div class="text-sm leading-relaxed" style="color: var(--c-text-soft)">
-            <strong style="color: var(--c-accent-soft)">Configuración de prompts del sistema</strong><br>
-            Edita las instrucciones que Clara recibe al analizar PQR, eventos adversos y reuniones. Los cambios se aplican de inmediato.
-        </div>
-    </div>
+    <p class="text-sm mb-5 max-w-3xl" style="color:var(--c-text-dim)">Edita las instrucciones que Clara recibe al analizar PQR, eventos adversos y reuniones. Los cambios se aplican de inmediato.</p>
 
     @php
         $tarjetas = [
@@ -75,7 +69,7 @@
              style="border-top: 1px solid var(--c-border); padding: 1.25rem;">
             <p class="text-xs mb-3" style="color: var(--c-text-dim); line-height: 1.5;">
                 Un término por línea. Las líneas que empiezan por
-                <code style="background:rgba(255,255,255,.08); padding:0 4px; border-radius:3px; font-size:.7rem;">#</code>
+                <code style="background:rgba(16,24,40,.08); padding:0 4px; border-radius:3px; font-size:.7rem;">#</code>
                 son comentarios. Whisper usa estos términos como pista al transcribir (límite: 224 chars efectivos).
             </p>
             @php
@@ -87,7 +81,7 @@
             @endphp
             <div class="text-xs mb-2 flex gap-4" style="color: var(--c-text-dim)">
                 <span>{{ $lineasActivas->count() }} términos activos</span>
-                <span style="color: {{ mb_strlen($promptEfectivo) >= 220 ? '#fca5a5' : 'var(--c-text-dim)' }}">
+                <span style="color: {{ mb_strlen($promptEfectivo) >= 220 ? 'var(--c-red-soft)' : 'var(--c-text-dim)' }}">
                     {{ mb_strlen($promptEfectivo) }} / 224 chars
                 </span>
             </div>

@@ -1,4 +1,4 @@
-<div class="max-w-5xl mx-auto" x-data="{ modal: false }" x-on:acta-enviada.window="setTimeout(() => { modal = false }, 1800)">
+<div class="max-w-5xl" x-data="{ modal: false }" x-on:acta-enviada.window="setTimeout(() => { modal = false }, 1800)">
 
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -9,7 +9,7 @@
                 @if($meeting->duracion_legible) &middot; {{ $meeting->duracion_legible }} @endif
             </p>
             @if($meeting->capture_report)
-                <p class="text-xs mt-1" style="color:{{ ($meeting->capture_report['status'] ?? '') === 'complete' ? '#6ee7b7' : '#fbbf24' }}">
+                <p class="text-xs mt-1" style="color:{{ ($meeting->capture_report['status'] ?? '') === 'complete' ? 'var(--c-green)' : 'var(--c-amber)' }}">
                     Captura {{ ($meeting->capture_report['status'] ?? '') === 'complete' ? 'verificada sin interrupciones detectadas' : 'con posibles huecos' }}
                     @if(!empty($meeting->capture_report['alerts']))
                         · {{ count($meeting->capture_report['alerts']) }} alerta(s) registrada(s)
@@ -41,7 +41,7 @@
                     <button type="button"
                         wire:click="eliminar"
                         wire:confirm="¿Seguro que quieres eliminar la reunión '{{ $meeting->titulo }}'? Se borrará el audio, la transcripción y el acta de forma permanente. Esta acción no se puede deshacer."
-                        class="block w-full text-left px-4 py-2 text-sm" style="color:#fca5a5;">
+                        class="block w-full text-left px-4 py-2 text-sm" style="color:var(--c-red-soft);">
                         Eliminar reunión
                     </button>
                 @endif
@@ -76,7 +76,7 @@
                 x-init="$watch('modal', v => v && $nextTick(() => $refs.emailInput.focus()))"
             >
             @if ($mensajeEnvio)
-                <p class="text-xs mb-2" style="color: {{ str_starts_with($mensajeEnvio, '✅') ? '#6ee7b7' : '#fca5a5' }};">
+                <p class="text-xs mb-2" style="color: {{ str_starts_with($mensajeEnvio, '✅') ? 'var(--c-green)' : 'var(--c-red-soft)' }};">
                     {{ $mensajeEnvio }}
                 </p>
             @endif
@@ -96,13 +96,13 @@
     </div>
 
     @if (session('status'))
-        <div class="kairo-panel p-4 mb-4 text-sm" style="color:#6ee7b7;border:1px solid #064e3b;">
+        <div class="kairo-panel p-4 mb-4 text-sm" style="color:var(--c-green);border:1px solid #cfe9db;">
             {{ session('status') }}
         </div>
     @endif
 
     @if ($mensajeCumple)
-        <div class="kairo-panel p-4 mb-4 text-sm" style="color:{{ str_starts_with($mensajeCumple, '✅') ? '#6ee7b7' : '#fca5a5' }};border:1px solid {{ str_starts_with($mensajeCumple, '✅') ? '#064e3b' : '#7f1d1d' }};">
+        <div class="kairo-panel p-4 mb-4 text-sm" style="color:{{ str_starts_with($mensajeCumple, '✅') ? 'var(--c-green)' : 'var(--c-red-soft)' }};border:1px solid {{ str_starts_with($mensajeCumple, '✅') ? '#cfe9db' : '#f1c9c5' }};">
             {{ $mensajeCumple }}
         </div>
     @endif
@@ -185,7 +185,7 @@
                     <button type="button"
                         wire:click="eliminarAudio"
                         wire:confirm="¿Eliminar solo el audio de esta reunión ({{ $meeting->audioPesaLegible() }})? El acta y la transcripción se conservan. Esta acción no se puede deshacer."
-                        class="kairo-btn-copy text-xs" style="color:#fca5a5;border-color:#7f1d1d;">
+                        class="kairo-btn-copy text-xs" style="color:var(--c-red-soft);border-color:#f1c9c5;">
                         Eliminar audio (liberar {{ $meeting->audioPesaLegible() }})
                     </button>
                 @endif

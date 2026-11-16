@@ -1,4 +1,4 @@
-<div class="max-w-2xl mx-auto space-y-6" x-data="{
+<div class="max-w-2xl space-y-6" x-data="{
     abrirPopup(url) {
         const popup = window.open(url, 'google_oauth', 'width=520,height=640');
         const poll = setInterval(() => {
@@ -10,14 +10,7 @@
     }
 }">
 
-    <div class="kairo-intro kairo-panel flex items-start gap-4 p-5">
-        <img src="{{ asset('clara.webp') }}" alt="Clara" class="w-12 h-12 kairo-avatar-ring flex-shrink-0">
-        <div class="text-sm leading-relaxed" style="color: var(--c-text-soft)">
-            <strong style="color: var(--c-accent-soft)">Calendarios de Google</strong><br>
-            Kairo necesita acceso a estos calendarios para detectar reuniones.
-            Si una cuenta aparece en rojo, haz clic en "Autorizar" — se abrirá Google y al aceptar queda activo automáticamente.
-        </div>
-    </div>
+    <p class="text-sm mb-5 max-w-3xl" style="color:var(--c-text-dim)">Kairo necesita acceso a estos calendarios para detectar reuniones. Si una cuenta aparece en rojo, haz clic en "Autorizar" — se abrirá Google y al aceptar queda activo automáticamente.</p>
 
     <div class="kairo-panel p-4 space-y-2">
         <div class="px-2 pb-2" style="border-bottom: 1px solid var(--c-border)">
@@ -27,14 +20,14 @@
         <div class="space-y-1 pt-1">
             @foreach ($cuentas as $cuenta)
             <div class="flex items-center gap-3 rounded-lg px-4 py-3"
-                 style="background: rgba(255,255,255,0.03); border: 1px solid var(--c-border)">
+                 style="background: rgba(16,24,40,0.03); border: 1px solid var(--c-border)">
                 <div class="flex-shrink-0 w-2 h-2 rounded-full"
-                     style="background: {{ $cuenta['estado'] === 'ok' ? '#10b981' : ($cuenta['estado'] === 'error' ? '#ef4444' : '#f59e0b') }}">
+                     style="background: {{ $cuenta['estado'] === 'ok' ? 'var(--c-green)' : ($cuenta['estado'] === 'error' ? '#ef4444' : '#f59e0b') }}">
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="font-medium text-sm" style="color: var(--c-text)">{{ $cuenta['nombre'] }}</div>
                     <div class="text-xs mt-0.5"
-                         style="color: {{ $cuenta['estado'] === 'ok' ? 'var(--c-text-dim)' : ($cuenta['estado'] === 'error' ? '#fca5a5' : '#fcd34d') }}">
+                         style="color: {{ $cuenta['estado'] === 'ok' ? 'var(--c-text-dim)' : ($cuenta['estado'] === 'error' ? 'var(--c-red-soft)' : 'var(--c-amber)') }}">
                         {{ $cuenta['mensaje'] }}
                     </div>
                 </div>

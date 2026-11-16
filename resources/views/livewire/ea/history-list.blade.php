@@ -1,7 +1,7 @@
-<div class="max-w-6xl mx-auto">
+<div class="w-full">
 
     @if (session('status'))
-        <div class="kairo-panel p-4 mb-4 text-sm" style="color:#6ee7b7;border:1px solid #064e3b;">
+        <div class="kairo-panel p-4 mb-4 text-sm" style="color:var(--c-green);border:1px solid #cfe9db;">
             {{ session('status') }}
         </div>
     @endif
@@ -75,9 +75,9 @@
                         <td>
                             @php
                                 $colorClasif = match($a->clasificacion) {
-                                    'Evento adverso' => ['bg' => 'rgba(239,68,68,0.15)', 'color' => '#fca5a5'],
-                                    'No evento adverso' => ['bg' => 'rgba(16,185,129,0.15)', 'color' => '#6ee7b7'],
-                                    'Incidente' => ['bg' => 'rgba(245,158,11,0.15)', 'color' => '#fcd34d'],
+                                    'Evento adverso' => ['bg' => 'rgba(239,68,68,0.15)', 'color' => 'var(--c-red-soft)'],
+                                    'No evento adverso' => ['bg' => 'rgb(47 138 95 / 0.15)', 'color' => 'var(--c-green)'],
+                                    'Incidente' => ['bg' => 'rgba(245,158,11,0.15)', 'color' => 'var(--c-amber)'],
                                     default => ['bg' => 'rgb(var(--c-accent-rgb) / 0.15)', 'color' => 'var(--c-text-soft)'],
                                 };
                             @endphp

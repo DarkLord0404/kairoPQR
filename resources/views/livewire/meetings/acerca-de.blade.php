@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl">
     <div class="flex items-center justify-between mb-6">
         <div>
             <a href="{{ route('reuniones') }}" wire:navigate class="text-xs font-medium underline" style="color:var(--c-text-dim)">&larr; Volver a reuniones</a>

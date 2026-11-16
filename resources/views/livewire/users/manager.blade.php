@@ -1,15 +1,9 @@
-<div class="max-w-5xl mx-auto space-y-5">
+<div class="w-full space-y-5">
 
-    <div class="kairo-intro kairo-panel flex items-start gap-4 p-5">
-        <img src="{{ asset('clara.webp') }}" alt="Clara" class="w-12 h-12 kairo-avatar-ring flex-shrink-0">
-        <div class="text-sm leading-relaxed" style="color: var(--c-text-soft)">
-            <strong style="color: var(--c-accent-soft)">Administración de usuarios</strong><br>
-            Crea cuentas y controla a qué módulos tiene acceso cada usuario. Los cambios de acceso aplican de inmediato.
-        </div>
-    </div>
+    <p class="text-sm mb-5 max-w-3xl" style="color:var(--c-text-dim)">Crea cuentas y controla a qué módulos tiene acceso cada usuario. Los cambios de acceso aplican de inmediato.</p>
 
     @if (session('success'))
-        <div class="rounded-lg p-3 text-sm" style="background: rgba(6,78,59,0.25); border: 1px solid #064e3b; color: #6ee7b7">
+        <div class="rounded-lg p-3 text-sm" style="background: rgb(47 138 95 / 0.25); border: 1px solid #cfe9db; color: var(--c-green)">
             {{ session('success') }}
         </div>
     @endif
@@ -31,7 +25,7 @@
                     <input wire:model="name" type="text" placeholder="Nombre completo"
                            class="kairo-textarea text-sm"
                            style="width:100%; box-sizing:border-box; display:block; padding:.55rem .75rem;">
-                    @error('name') <p class="text-xs mt-1" style="color:#fca5a5">{{ $message }}</p> @enderror
+                    @error('name') <p class="text-xs mt-1" style="color:var(--c-red-soft)">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
@@ -39,7 +33,7 @@
                     <input wire:model="email" type="email" placeholder="correo@ejemplo.com"
                            class="kairo-textarea text-sm"
                            style="width:100%; box-sizing:border-box; display:block; padding:.55rem .75rem;">
-                    @error('email') <p class="text-xs mt-1" style="color:#fca5a5">{{ $message }}</p> @enderror
+                    @error('email') <p class="text-xs mt-1" style="color:var(--c-red-soft)">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
@@ -47,7 +41,7 @@
                     <input wire:model="password" type="password" placeholder="Mínimo 6 caracteres"
                            class="kairo-textarea text-sm"
                            style="width:100%; box-sizing:border-box; display:block; padding:.55rem .75rem;">
-                    @error('password') <p class="text-xs mt-1" style="color:#fca5a5">{{ $message }}</p> @enderror
+                    @error('password') <p class="text-xs mt-1" style="color:var(--c-red-soft)">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
@@ -116,7 +110,7 @@
                             @endif
                             @if (!$user->is_active)
                                 <span class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide"
-                                    style="background: rgba(127,29,29,0.3); color: #fca5a5">Inactivo</span>
+                                    style="background: rgb(199 73 63 / 0.3); color: var(--c-red-soft)">Inactivo</span>
                             @endif
                         </div>
                         <div class="text-xs mt-0.5" style="color: var(--c-text-dim)">{{ $user->email }}</div>
@@ -124,7 +118,7 @@
                     <button wire:click="toggle({{ $user->id }})"
                         wire:confirm="¿Confirmas cambiar el estado de este usuario?"
                         class="text-xs flex-shrink-0 rounded-md font-medium"
-                        style="padding:.3rem .75rem; {{ $user->is_active ? 'color:var(--c-text-dim);background:rgb(var(--c-steel-rgb) / 0.1)' : 'color:#6ee7b7;background:rgba(6,78,59,0.2)' }}"
+                        style="padding:.3rem .75rem; {{ $user->is_active ? 'color:var(--c-text-dim);background:rgb(var(--c-steel-rgb) / 0.1)' : 'color:var(--c-green);background:rgb(47 138 95 / 0.2)' }}"
                         {{ $user->id === auth()->id() ? 'disabled' : '' }}>
                         {{ $user->is_active ? 'Desactivar' : 'Activar' }}
                     </button>

@@ -7,7 +7,7 @@
         style="
             border: 1px solid {{ $hayFallos ? 'rgba(239,68,68,0.5)' : ($hayAdvertencias ? 'rgba(245,158,11,0.5)' : 'var(--c-border-strong)') }};
             background: {{ $hayFallos ? 'rgba(239,68,68,0.12)' : ($hayAdvertencias ? 'rgba(245,158,11,0.12)' : 'var(--c-surface-2)') }};
-            color: {{ $hayFallos ? '#fca5a5' : ($hayAdvertencias ? '#fcd34d' : 'var(--c-text-soft)') }};
+            color: {{ $hayFallos ? 'var(--c-red-soft)' : ($hayAdvertencias ? 'var(--c-amber)' : 'var(--c-text-soft)') }};
         ">
         @if ($hayFallos)
             <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
@@ -93,7 +93,7 @@
 
                     {{-- Header del grupo --}}
                     <div class="px-4 py-2 flex items-center justify-between sticky top-0"
-                        style="background:var(--c-surface-2); border-bottom:1px solid rgba(255,255,255,0.06); z-index:1;">
+                        style="background:var(--c-surface-2); border-bottom:1px solid rgba(16,24,40,0.06); z-index:1;">
                         <div class="flex items-center gap-2">
                             <span class="text-sm">{{ $icono }}</span>
                             <span class="text-xs font-bold uppercase tracking-wider" style="color:var(--c-text-dim)">
@@ -103,15 +103,15 @@
                         <div class="flex items-center gap-1.5">
                             @if ($hayFalloGrupo)
                                 <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block"></span>
-                                <span class="text-[10px]" style="color:#fca5a5">
+                                <span class="text-[10px]" style="color:var(--c-red-soft)">
                                     {{ collect($items)->where('estado', 'fallo')->count() }} falla(s)
                                 </span>
                             @elseif ($hayAdvGrupo)
                                 <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block"></span>
-                                <span class="text-[10px]" style="color:#fcd34d">advertencia</span>
+                                <span class="text-[10px]" style="color:var(--c-amber)">advertencia</span>
                             @elseif (!empty($items))
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
-                                <span class="text-[10px]" style="color:#34d399">OK</span>
+                                <span class="text-[10px]" style="color:var(--c-green)">OK</span>
                             @elseif ($verificando)
                                 <span class="text-[10px] animate-pulse" style="color:var(--c-text-dim)">pendiente</span>
                             @endif
@@ -120,7 +120,7 @@
 
                     {{-- Servicios del grupo --}}
                     @foreach ($items as $item)
-                        <div class="flex items-start gap-3 px-4 py-2.5" style="border-bottom:1px solid rgba(255,255,255,0.04)">
+                        <div class="flex items-start gap-3 px-4 py-2.5" style="border-bottom:1px solid rgba(16,24,40,0.04)">
                             <div class="mt-1.5 flex-shrink-0">
                                 @if ($item['estado'] === 'ok')
                                     <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
@@ -132,7 +132,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="text-xs font-semibold flex items-center justify-between gap-2"
-                                    style="color:{{ $item['estado'] === 'ok' ? 'var(--c-text)' : ($item['estado'] === 'advertencia' ? '#fcd34d' : '#fca5a5') }}">
+                                    style="color:{{ $item['estado'] === 'ok' ? 'var(--c-text)' : ($item['estado'] === 'advertencia' ? 'var(--c-amber)' : 'var(--c-red-soft)') }}">
                                     <span class="truncate">{{ $item['servicio'] }}</span>
                                     @if ($item['duracion_ms'])
                                         <span class="font-normal text-[10px] flex-shrink-0" style="color:var(--c-text-dim)">{{ $item['duracion_ms'] }}ms</span>
@@ -147,7 +147,7 @@
                     @if ($verificando)
                         @php $pendientesGrupo = max(0, $esperadosGrupo - count($items)); @endphp
                         @for ($i = 0; $i < $pendientesGrupo; $i++)
-                            <div class="flex items-center gap-3 px-4 py-2.5" style="border-bottom:1px solid rgba(255,255,255,0.04)">
+                            <div class="flex items-center gap-3 px-4 py-2.5" style="border-bottom:1px solid rgba(16,24,40,0.04)">
                                 <span class="w-2 h-2 rounded-full bg-gray-600 inline-block flex-shrink-0 animate-pulse"></span>
                                 <span class="text-xs animate-pulse" style="color:var(--c-text-dim)">Verificando...</span>
                             </div>

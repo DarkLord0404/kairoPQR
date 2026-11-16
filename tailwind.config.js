@@ -12,15 +12,14 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
-                display: ['"Space Grotesk"', ...defaultTheme.fontFamily.sans],
-            },
+                sans: ['Manrope', ...defaultTheme.fontFamily.sans],
+                },
             colors: {
-                // Acento de Clara (petróleo). Reemplaza los antiguos blue/indigo.
+                // Principal de Clara 2.0 (azul marino). Reemplaza los antiguos blue/indigo.
                 accent: {
-                    50: '#effaf9', 100: '#d6f1ee', 200: '#ade2dc', 300: '#7fcdc5',
-                    400: '#6cc4bd', 500: '#2f948f', 600: '#26807c', 700: '#1f6b68',
-                    800: '#1b5654', 900: '#163f3e', 950: '#0b2221',
+                    50: '#f3f5f9', 100: '#e6eaf2', 200: '#cbd3e3', 300: '#9eabc7',
+                    400: '#6b7ca3', 500: '#46578a', 600: '#2b3a67', 700: '#1f2a44',
+                    800: '#182136', 900: '#121a2b', 950: '#0b101c',
                 },
             },
         },

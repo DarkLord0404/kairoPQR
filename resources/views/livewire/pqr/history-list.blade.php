@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto">
+<div class="w-full">
 
     <div class="grid grid-cols-3 gap-4 mb-6">
         <div class="kairo-stat-card">
@@ -6,7 +6,7 @@
             <div class="kairo-stat-label">Analisis realizados</div>
         </div>
         <div class="kairo-stat-card">
-            <div class="kairo-stat-value" style="color:#fca5a5">{{ $totalJuridica }}</div>
+            <div class="kairo-stat-value" style="color:var(--c-red-soft)">{{ $totalJuridica }}</div>
             <div class="kairo-stat-label">Requirieron revision juridica</div>
         </div>
         <div class="kairo-stat-card">
@@ -16,7 +16,7 @@
     </div>
 
     @if (session('status'))
-        <div class="kairo-panel p-4 mb-4 text-sm" style="color:#6ee7b7;border:1px solid #064e3b;">
+        <div class="kairo-panel p-4 mb-4 text-sm" style="color:var(--c-green);border:1px solid #cfe9db;">
             {{ session('status') }}
         </div>
     @endif

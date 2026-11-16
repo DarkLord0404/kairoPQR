@@ -1,17 +1,11 @@
-<div class="max-w-6xl mx-auto">
+<div class="w-full">
 
-    <div class="kairo-intro kairo-panel flex items-start gap-4 p-5 mb-4">
-        <img src="{{ asset('clara.webp') }}" alt="Clara" class="w-12 h-12 kairo-avatar-ring flex-shrink-0">
-        <div class="text-sm leading-relaxed" style="color: var(--c-text-soft)">
-            <strong style="color: var(--c-accent-soft)">Reuniones grabadas por Kairo.</strong>
-            Aqui aparecen todas las reuniones a las que el bot asistio, con su audio, transcripcion y acta generada.
-        </div>
-    </div>
+    <p class="text-sm mb-5 max-w-3xl" style="color:var(--c-text-dim)">Aquí aparecen todas las reuniones a las que asistió el bot, con su audio, transcripción y acta generada.</p>
 
     @if(auth()->user()?->isMaster())
         <div class="kairo-panel mb-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div><strong class="text-sm" style="color:var(--c-text)">Envío automático a CUMPLE</strong><p class="mt-1 text-xs" style="color:var(--c-text-dim)">Envía como borrador cada acta nueva o actualizada. No crea acciones automáticamente.</p></div>
-            <label class="flex shrink-0 cursor-pointer items-center gap-3 text-sm" style="color:var(--c-text)"><input type="checkbox" wire:model.live="envioAutomaticoCumple" class="rounded border-zinc-600 bg-zinc-900 text-accent-600"><span>{{ $envioAutomaticoCumple ? 'Activado' : 'Desactivado' }}</span></label>
+            <label class="flex shrink-0 cursor-pointer items-center gap-3 text-sm" style="color:var(--c-text)"><input type="checkbox" wire:model.live="envioAutomaticoCumple" class="rounded border-gray-300 text-accent-700"><span>{{ $envioAutomaticoCumple ? 'Activado' : 'Desactivado' }}</span></label>
         </div>
     @endif
 
@@ -32,7 +26,7 @@
     </div>
 
     @if (session('status'))
-        <div class="kairo-panel p-4 mb-4 text-sm" style="color:#6ee7b7;border:1px solid #064e3b;">
+        <div class="kairo-panel p-4 mb-4 text-sm" style="color:var(--c-green);border:1px solid #cfe9db;">
             {{ session('status') }}
         </div>
     @endif
@@ -126,7 +120,7 @@
                             <td>
                                 @php
                                     $estilos = [
-                                        'con_acta' => 'background: rgba(16,185,129,.15); color:#6ee7b7; border:1px solid #064e3b;',
+                                        'con_acta' => 'background: rgb(47 138 95 / .15); color:var(--c-green); border:1px solid #cfe9db;',
                                         'transcrita' => 'background: rgb(var(--c-accent-rgb) / .15); color:var(--c-text-soft); border:1px solid var(--c-border-strong);',
                                         'pendiente' => 'background: rgb(var(--c-steel-rgb) / .15); color:var(--c-text-dim); border:1px solid var(--c-border-strong);',
                                     ];
@@ -146,7 +140,7 @@
                                 @endif
                             </td>
                             <td>
-                                @if($reunion->cumple_synced_at)<span class="mb-1 block text-[10px]" style="color:#6ee7b7" title="{{ $reunion->cumple_synced_at->format('d/m/Y H:i') }}">CUMPLE ✓</span>@elseif($reunion->cumple_sync_error)<span class="mb-1 block text-[10px]" style="color:#fca5a5" title="{{ $reunion->cumple_sync_error }}">CUMPLE !</span>@endif
+                                @if($reunion->cumple_synced_at)<span class="mb-1 block text-[10px]" style="color:var(--c-green)" title="{{ $reunion->cumple_synced_at->format('d/m/Y H:i') }}">CUMPLE ✓</span>@elseif($reunion->cumple_sync_error)<span class="mb-1 block text-[10px]" style="color:var(--c-red-soft)" title="{{ $reunion->cumple_sync_error }}">CUMPLE !</span>@endif
                                 <a href="{{ route('reuniones.detalle', $reunion) }}" wire:navigate
                                    class="kairo-btn-copy">Ver</a>
                             </td>

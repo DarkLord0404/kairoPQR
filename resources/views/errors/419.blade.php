@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="/favicon-32.png?v=3">
     <title>Sesion expirada — Clara · Kairo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>

@@ -1,4 +1,4 @@
-<div class="max-w-xl mx-auto space-y-5" wire:poll.3000ms="polling">
+<div class="max-w-xl space-y-5" wire:poll.3000ms="polling">
 
     {{-- Estado actual --}}
     <div class="kairo-panel p-5">
@@ -10,13 +10,13 @@
             <div class="space-y-3">
             @foreach ($reunionesActivas as $reunion)
             <div class="rounded-xl p-4 flex items-start gap-4"
-                 style="background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.25);">
+                 style="background: rgb(47 138 95 / 0.07); border: 1px solid rgb(47 138 95 / 0.25);">
                 <div class="flex-shrink-0 mt-1">
                     <span class="w-3 h-3 rounded-full bg-emerald-400 inline-block animate-pulse"
-                          style="box-shadow: 0 0 8px #10b981;"></span>
+                          style="box-shadow: 0 0 8px var(--c-green);"></span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-sm font-semibold mb-1" style="color: #34d399">Kairo está {{ $reunion['estado'] }}</div>
+                    <div class="text-sm font-semibold mb-1" style="color: var(--c-green)">Kairo está {{ $reunion['estado'] }}</div>
                     <div class="text-xs mb-0.5 font-medium" style="color: var(--c-text)">
                         {{ $reunion['titulo'] }}
                     </div>
@@ -26,7 +26,7 @@
                         {{ $reunion['url'] }}
                     </a>
                     @if($reunion['heartbeat_second'] > 0)
-                        <div class="text-xs mt-1" style="color:{{ $reunion['capture_alerts'] ? '#fbbf24' : '#6ee7b7' }}">
+                        <div class="text-xs mt-1" style="color:{{ $reunion['capture_alerts'] ? 'var(--c-amber)' : 'var(--c-green)' }}">
                             Audio {{ $reunion['audio_alive'] === false ? 'interrumpido' : 'verificado' }} ·
                             {{ intdiv($reunion['heartbeat_second'], 60) }} min capturados ·
                             {{ round($reunion['audio_bytes'] / 1048576, 1) }} MB
@@ -36,7 +36,7 @@
                 </div>
                 <button wire:click="desconectar('{{ $reunion['session_id'] }}')" wire:loading.attr="disabled" wire:target="desconectar"
                     class="flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-md whitespace-nowrap flex items-center gap-1.5"
-                    style="color:#fca5a5; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3)">
+                    style="color:var(--c-red-soft); background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3)">
                     <span wire:loading wire:target="desconectar"
                           class="inline-block w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin"></span>
                     <span wire:loading.remove wire:target="desconectar">✕</span>
@@ -48,7 +48,7 @@
         @else
             {{-- Libre --}}
             <div class="rounded-xl p-4 flex items-center gap-3"
-                 style="background: rgba(255,255,255,0.03); border: 1px solid var(--c-border);">
+                 style="background: rgba(16,24,40,0.03); border: 1px solid var(--c-border);">
                 <span class="w-3 h-3 rounded-full bg-gray-500 inline-block flex-shrink-0"></span>
                 <span class="text-sm" style="color: var(--c-text-dim)">Kairo no está en ninguna reunión</span>
             </div>
@@ -58,7 +58,7 @@
     @if ($colasProcesamiento)
         <div class="rounded-xl p-4 space-y-3"
              style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.25)">
-            <div class="text-sm font-bold" style="color:#fbbf24">Procesamiento pendiente</div>
+            <div class="text-sm font-bold" style="color:var(--c-amber)">Procesamiento pendiente</div>
             @foreach ($colasProcesamiento as $trabajo)
                 @php
                     $etiqueta = match ($trabajo['fase']) {
@@ -73,7 +73,7 @@
                 @endphp
                 <div class="flex items-center justify-between gap-3 text-xs">
                     <span class="truncate" style="color:var(--c-text)">{{ $trabajo['titulo'] }}</span>
-                    <span class="text-right" style="color:#fbbf24">{{ $etiqueta }}</span>
+                    <span class="text-right" style="color:var(--c-amber)">{{ $etiqueta }}</span>
                 </div>
             @endforeach
         </div>
@@ -96,7 +96,7 @@
                 type="url"
                 placeholder="https://meet.google.com/xxx-xxxx-xxx"
                 class="w-full text-sm rounded-lg px-3 py-2.5 outline-none transition-all"
-                style="background: rgba(255,255,255,0.05); border: 1px solid var(--c-border); color: var(--c-text);"
+                style="background: rgba(16,24,40,0.05); border: 1px solid var(--c-border); color: var(--c-text);"
                 @focus="$el.style.borderColor='rgb(var(--c-accent-rgb) / 0.5)'"
                 @blur="$el.style.borderColor='var(--c-border)'"
                 >
@@ -112,7 +112,7 @@
                 type="text"
                 placeholder="Nombre de la reunión"
                 class="w-full text-sm rounded-lg px-3 py-2.5 outline-none transition-all"
-                style="background: rgba(255,255,255,0.05); border: 1px solid var(--c-border); color: var(--c-text);"
+                style="background: rgba(16,24,40,0.05); border: 1px solid var(--c-border); color: var(--c-text);"
                 @focus="$el.style.borderColor='rgb(var(--c-accent-rgb) / 0.5)'"
                 @blur="$el.style.borderColor='var(--c-border)'"
                 >
@@ -121,7 +121,7 @@
         {{-- Error --}}
         @if ($error)
             <div class="rounded-lg px-3 py-2.5 text-xs"
-                 style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5;">
+                 style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--c-red-soft);">
                 {{ $error }}
             </div>
         @endif

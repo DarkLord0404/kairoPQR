@@ -1,4 +1,4 @@
-<div class="max-w-5xl mx-auto">
+<div class="max-w-5xl">
 
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -19,7 +19,7 @@
                 <button type="button"
                     wire:click="eliminar"
                     wire:confirm="¿Seguro que quieres eliminar este análisis del historial? Esta acción no se puede deshacer."
-                    class="block w-full text-left px-4 py-2 text-sm" style="color:#fca5a5;">
+                    class="block w-full text-left px-4 py-2 text-sm" style="color:var(--c-red-soft);">
                     Eliminar análisis
                 </button>
             </x-slot>
@@ -40,7 +40,7 @@
     @endif
 
     @if (session('status'))
-        <div class="kairo-panel p-4 mb-4 text-sm" style="color:#6ee7b7;border:1px solid #064e3b;">
+        <div class="kairo-panel p-4 mb-4 text-sm" style="color:var(--c-green);border:1px solid #cfe9db;">
             {{ session('status') }}
         </div>
     @endif
@@ -101,8 +101,8 @@
             <div x-ref="planes" class="kairo-content whitespace-pre-line" style="color: var(--c-text)">{{ $secciones['PLANES DE ACCIÓN'] ?? '' }}</div>
         </div>
 
-        <div class="kairo-section" style="border-left: 3px solid #10b981">
-            <div class="kairo-section-title" style="color: #10b981">Conclusiones</div>
+        <div class="kairo-section" style="border-left: 3px solid var(--c-green)">
+            <div class="kairo-section-title" style="color: var(--c-green)">Conclusiones</div>
             <div class="kairo-content whitespace-pre-line">{{ $secciones['CONCLUSIONES'] ?? '' }}</div>
         </div>
 

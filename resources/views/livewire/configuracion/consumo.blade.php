@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto space-y-6">
+<div class="w-full space-y-6">
     <div>
         <div class="text-xs font-semibold uppercase tracking-wider" style="color:var(--c-text-soft)">Configuración</div>
         <h1 class="text-2xl font-bold mt-1" style="color:var(--c-text)">Consumo de OpenClaw</h1>

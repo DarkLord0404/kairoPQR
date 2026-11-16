@@ -1,4 +1,4 @@
-<div class="kairo-panel p-5"
+<div class="h-full"
     x-data="{
         archivoNombre: null,
         cargando: false,
@@ -47,7 +47,7 @@
     }">
 
     <div class="flex items-center justify-between mb-2">
-        <label class="kairo-label">Historia clínica o registros disponibles</label>
+        <label class="kairo-label">Historia clínica o registros</label>
         <label x-show="!archivoNombre"
             class="flex items-center gap-1.5 cursor-pointer text-xs px-2.5 py-1 rounded-md transition-colors"
             style="color:var(--c-text-soft);border:1px solid rgb(var(--c-accent-rgb) / 0.25);background:rgb(var(--c-accent-rgb) / 0.08)">
@@ -86,12 +86,12 @@
     {{-- Error --}}
     <div x-show="errorArchivo" x-cloak
         class="mb-2 px-3 py-2 rounded-lg text-xs"
-        style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5">
+        style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--c-red-soft)">
         <span x-text="errorArchivo"></span>
     </div>
 
     {{-- Textarea sin archivo — intercepta paste largo --}}
-    <textarea x-show="!archivoNombre" wire:model="historia" rows="9"
+    <textarea x-show="!archivoNombre" wire:model="historia" rows="10"
         placeholder="Pegue aquí historia clínica, evoluciones, notas, órdenes, epicrisis, triage..."
         class="kairo-textarea w-full text-sm p-3"
         @paste="manejarPegado($event)"></textarea>

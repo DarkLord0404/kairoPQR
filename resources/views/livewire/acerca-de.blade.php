@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl">
 
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-xl font-bold" style="color: var(--c-text)">Acerca del sistema</h1>
