@@ -86,3 +86,9 @@ Route::middleware(['auth'])->group(function () {
 Route::get('oauth/calendar/callback', [GoogleOAuthController::class, 'callback']);
 
 require __DIR__.'/auth.php';
+
+// Kairo Sepsis Drive integration
+Route::get('sepsis/conectar-drive', [\App\Http\Controllers\SepsisDriveOAuthController::class, 'connect'])->middleware(['auth', 'master'])->name('sepsis.drive.connect');
+
+Route::get('configuracion/sepsis', [\App\Http\Controllers\SepsisDriveOAuthController::class, 'status'])->middleware(['auth', 'master'])->name('configuracion.sepsis');
+Route::post('sepsis/verificar-drive', [\App\Http\Controllers\SepsisDriveOAuthController::class, 'verify'])->middleware(['auth', 'master'])->name('sepsis.drive.verify');

@@ -10,6 +10,11 @@ class GoogleOAuthController extends Controller
 {
     public function callback(Request $request)
     {
+        // Separate CSRF-protected institutional Sepsis consent flow.
+        if (str_starts_with((string) $request->query('state', ''), 'sepsis_')) {
+            return app(SepsisDriveOAuthController::class)->callback($request);
+        }
+
         if ($request->has('error')) {
             return $this->paginaResultado('error', 'Autorización rechazada: ' . $request->get('error'));
         }
