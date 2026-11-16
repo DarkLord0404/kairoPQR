@@ -2,9 +2,9 @@
 
     <div class="flex items-center justify-between mb-6">
         <div>
-            <a href="{{ route('historial') }}" wire:navigate class="text-xs font-medium underline" style="color: var(--kairo-text-dim)">&larr; Volver al historial</a>
-            <h1 class="text-xl font-bold mt-1" style="color: var(--kairo-text)">Análisis #{{ $analysis->id }}</h1>
-            <p class="text-sm" style="color: var(--kairo-text-dim)">
+            <a href="{{ route('historial') }}" wire:navigate class="text-xs font-medium underline" style="color: var(--c-text-dim)">&larr; Volver al historial</a>
+            <h1 class="text-xl font-bold mt-1" style="color: var(--c-text)">Análisis #{{ $analysis->id }}</h1>
+            <p class="text-sm" style="color: var(--c-text-dim)">
                 {{ $analysis->created_at->translatedFormat('d \d\e F \d\e Y, h:i A') }}
                 @if ($analysis->user) &middot; {{ $analysis->user->name }} @endif
                 @if ($analysis->clasificacion) &middot; {{ $analysis->clasificacion }} @endif
@@ -27,7 +27,7 @@
     </div>
 
     @if ($analysis->tokens_totales !== null || $analysis->duracion_segundos)
-        <div class="kairo-panel p-3 mb-5 text-xs flex flex-wrap gap-x-4 gap-y-1" style="color: var(--kairo-text-dim)">
+        <div class="kairo-panel p-3 mb-5 text-xs flex flex-wrap gap-x-4 gap-y-1" style="color: var(--c-text-dim)">
             @if ($analysis->tokens_totales !== null)<span><strong>Tokens procesados:</strong> {{ number_format($analysis->tokens_totales, 0, ',', '.') }}</span>@endif
             @if ($analysis->tokens_entrada !== null)<span>Entrada: {{ number_format($analysis->tokens_entrada, 0, ',', '.') }}</span>@endif
             @if ($analysis->tokens_salida !== null)<span>Salida: {{ number_format($analysis->tokens_salida, 0, ',', '.') }}</span>@endif
@@ -47,16 +47,16 @@
 
     <div class="kairo-panel p-5 mb-4">
         <div class="kairo-label mb-2">Queja original</div>
-        <div class="text-sm whitespace-pre-line" style="color: var(--kairo-text-dim)">{{ $analysis->queja }}</div>
+        <div class="text-sm whitespace-pre-line" style="color: var(--c-text-dim)">{{ $analysis->queja }}</div>
     </div>
 
     @if ($analysis->historia)
         <div class="kairo-panel p-5 mb-6" x-data="{ abierto: false }">
             <div class="flex items-center justify-between cursor-pointer" @click="abierto = ! abierto">
                 <div class="kairo-label">Historia clínica / registros aportados</div>
-                <span x-text="abierto ? '▲' : '▼'" style="font-size:9px; color: var(--kairo-text-dim)"></span>
+                <span x-text="abierto ? '▲' : '▼'" style="font-size:9px; color: var(--c-text-dim)"></span>
             </div>
-            <div x-show="abierto" x-cloak x-transition class="text-sm whitespace-pre-line mt-3" style="color: var(--kairo-text-dim)">{{ $analysis->historia }}</div>
+            <div x-show="abierto" x-cloak x-transition class="text-sm whitespace-pre-line mt-3" style="color: var(--c-text-dim)">{{ $analysis->historia }}</div>
         </div>
     @endif
 
@@ -70,12 +70,12 @@
     <div class="space-y-4">
         @if ($sinSecciones)
             {{-- Fallback: model returned free-form text without section headers --}}
-            <div class="kairo-section" style="border:1px solid var(--kairo-blue-dim);border-radius:0.75rem;padding:1rem;">
+            <div class="kairo-section" style="border:1px solid var(--c-text-soft);border-radius:0.75rem;padding:1rem;">
                 <div class="kairo-section-title flex items-center justify-between">
                     Análisis completo
-                    <span class="text-xs font-normal" style="color:var(--kairo-text-dim)">Respuesta sin secciones estructuradas</span>
+                    <span class="text-xs font-normal" style="color:var(--c-text-dim)">Respuesta sin secciones estructuradas</span>
                 </div>
-                <div x-data class="kairo-content whitespace-pre-line leading-relaxed" style="color:#e2e8f0" x-ref="respuesta">
+                <div x-data class="kairo-content whitespace-pre-line leading-relaxed" style="color:var(--c-text)" x-ref="respuesta">
                     {{ $analysis->respuesta_completa }}
                     <button type="button" x-on:click="navigator.clipboard.writeText($refs.respuesta.innerText)" class="kairo-btn-copy mt-3 block">Copiar</button>
                 </div>
@@ -90,7 +90,7 @@
             </div>
 
             @if (! empty($secciones['RESUMEN PARA VERIFICACION INTERNA']))
-                <div class="kairo-section kairo-sec-verificacion" style="border: 1px dashed var(--kairo-blue-dim); border-radius: 0.75rem; padding: 1rem;">
+                <div class="kairo-section kairo-sec-verificacion" style="border: 1px dashed var(--c-text-soft); border-radius: 0.75rem; padding: 1rem;">
                     <div class="kairo-section-title">Resumen para verificación interna</div>
                     <div class="kairo-content whitespace-pre-line">{{ $secciones['RESUMEN PARA VERIFICACION INTERNA'] }}</div>
                 </div>
@@ -106,7 +106,7 @@
                     Respuesta sugerida al usuario
                     <button type="button" x-on:click="navigator.clipboard.writeText($refs.respuesta.innerText)" class="kairo-btn-copy">Copiar</button>
                 </div>
-                <div x-ref="respuesta" class="kairo-content whitespace-pre-line leading-relaxed" style="color: #e2e8f0">{{ $secciones['RESPUESTA SUGERIDA AL USUARIO'] ?? $analysis->respuesta_completa }}</div>
+                <div x-ref="respuesta" class="kairo-content whitespace-pre-line leading-relaxed" style="color: var(--c-text)">{{ $secciones['RESPUESTA SUGERIDA AL USUARIO'] ?? $analysis->respuesta_completa }}</div>
             </div>
 
             <div class="kairo-section kairo-sec-acciones">

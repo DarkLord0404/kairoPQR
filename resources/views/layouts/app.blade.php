@@ -4,33 +4,31 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="theme-color" content="#0b0b0f">
 
-        <title>{{ config('app.name', 'Kairo PQR') }}</title>
-        <link rel="icon" type="image/png" href="{{ asset('kairo.png') }}">
-        <link rel="shortcut icon" type="image/png" href="{{ asset('kairo.png') }}">
-        <link rel="apple-touch-icon" href="{{ asset('kairo.png') }}">
+        <title>Clara · Kairo</title>
+        <link rel="icon" type="image/png" href="{{ asset('clara.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('clara.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700|space-grotesk:500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased kairo-theme">
-        <div class="kairo-shell">
+        <div class="kairo-shell clara-main">
             <livewire:layout.navigation />
 
-            <!-- Page Heading -->
             @if (isset($header))
                 <header>
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
                 </header>
             @endif
 
-            <!-- Page Content -->
             <main class="py-6 px-4 sm:px-6 lg:px-8">
                 {{ $slot }}
             </main>

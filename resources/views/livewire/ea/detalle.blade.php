@@ -2,9 +2,9 @@
 
     <div class="flex items-center justify-between mb-6">
         <div>
-            <a href="{{ route('ea.historial') }}" wire:navigate class="text-xs font-medium underline" style="color: var(--kairo-text-dim)">&larr; Volver al historial</a>
-            <h1 class="text-xl font-bold mt-1" style="color: var(--kairo-text)">Análisis EA #{{ $analysis->id }}</h1>
-            <p class="text-sm" style="color: var(--kairo-text-dim)">
+            <a href="{{ route('ea.historial') }}" wire:navigate class="text-xs font-medium underline" style="color: var(--c-text-dim)">&larr; Volver al historial</a>
+            <h1 class="text-xl font-bold mt-1" style="color: var(--c-text)">Análisis EA #{{ $analysis->id }}</h1>
+            <p class="text-sm" style="color: var(--c-text-dim)">
                 {{ $analysis->created_at->translatedFormat('d \d\e F \d\e Y, h:i A') }}
                 @if ($analysis->user) &middot; {{ $analysis->user->name }} @endif
                 @if ($analysis->clasificacion) &middot; {{ $analysis->clasificacion }} @endif
@@ -27,7 +27,7 @@
     </div>
 
     @if ($analysis->tokens_totales !== null || $analysis->duracion_segundos)
-        <div class="kairo-panel p-3 mb-5 text-xs flex flex-wrap gap-x-4 gap-y-1" style="color: var(--kairo-text-dim)">
+        <div class="kairo-panel p-3 mb-5 text-xs flex flex-wrap gap-x-4 gap-y-1" style="color: var(--c-text-dim)">
             @if ($analysis->tokens_totales !== null)<span><strong>Tokens procesados:</strong> {{ number_format($analysis->tokens_totales, 0, ',', '.') }}</span>@endif
             @if ($analysis->tokens_entrada !== null)<span>Entrada: {{ number_format($analysis->tokens_entrada, 0, ',', '.') }}</span>@endif
             @if ($analysis->tokens_salida !== null)<span>Salida: {{ number_format($analysis->tokens_salida, 0, ',', '.') }}</span>@endif
@@ -47,16 +47,16 @@
 
     <div class="kairo-panel p-5 mb-4">
         <div class="kairo-label mb-2">Descripción del caso</div>
-        <div class="text-sm whitespace-pre-line" style="color: var(--kairo-text-dim)">{{ $analysis->caso }}</div>
+        <div class="text-sm whitespace-pre-line" style="color: var(--c-text-dim)">{{ $analysis->caso }}</div>
     </div>
 
     @if ($analysis->historia)
         <div class="kairo-panel p-5 mb-6" x-data="{ abierto: false }">
             <div class="flex items-center justify-between cursor-pointer" @click="abierto = ! abierto">
                 <div class="kairo-label">Historia clínica / registros aportados</div>
-                <span x-text="abierto ? '▲' : '▼'" style="font-size:9px; color: var(--kairo-text-dim)"></span>
+                <span x-text="abierto ? '▲' : '▼'" style="font-size:9px; color: var(--c-text-dim)"></span>
             </div>
-            <div x-show="abierto" x-cloak x-transition class="text-sm whitespace-pre-line mt-3" style="color: var(--kairo-text-dim)">{{ $analysis->historia }}</div>
+            <div x-show="abierto" x-cloak x-transition class="text-sm whitespace-pre-line mt-3" style="color: var(--c-text-dim)">{{ $analysis->historia }}</div>
         </div>
     @endif
 
@@ -81,7 +81,7 @@
             </div>
         </div>
 
-        <div class="kairo-section" style="border-left: 3px solid var(--kairo-blue-dim)">
+        <div class="kairo-section" style="border-left: 3px solid var(--c-text-soft)">
             <div class="kairo-section-title">Factores organizacionales y culturales</div>
             <div class="kairo-content prose prose-invert prose-sm max-w-none">
                 {!! \Illuminate\Support\Str::markdown($secciones['FACTORES RELACIONADOS CON LA ADMINISTRACIÓN DE LA CULTURA ORGANIZACIONAL'] ?? '') !!}
@@ -98,7 +98,7 @@
                 Planes de acción
                 <button type="button" x-on:click="navigator.clipboard.writeText($refs.planes.innerText)" class="kairo-btn-copy">Copiar</button>
             </div>
-            <div x-ref="planes" class="kairo-content whitespace-pre-line" style="color: #e2e8f0">{{ $secciones['PLANES DE ACCIÓN'] ?? '' }}</div>
+            <div x-ref="planes" class="kairo-content whitespace-pre-line" style="color: var(--c-text)">{{ $secciones['PLANES DE ACCIÓN'] ?? '' }}</div>
         </div>
 
         <div class="kairo-section" style="border-left: 3px solid #10b981">

@@ -5,9 +5,9 @@
     <button type="button" @click="abierto = !abierto"
         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer"
         style="
-            border: 1px solid {{ $hayFallos ? 'rgba(239,68,68,0.5)' : ($hayAdvertencias ? 'rgba(245,158,11,0.5)' : 'rgba(59,130,246,0.35)') }};
-            background: {{ $hayFallos ? 'rgba(239,68,68,0.12)' : ($hayAdvertencias ? 'rgba(245,158,11,0.12)' : 'rgba(59,130,246,0.12)') }};
-            color: {{ $hayFallos ? '#fca5a5' : ($hayAdvertencias ? '#fcd34d' : 'var(--kairo-blue-dim)') }};
+            border: 1px solid {{ $hayFallos ? 'rgba(239,68,68,0.5)' : ($hayAdvertencias ? 'rgba(245,158,11,0.5)' : 'var(--c-border-strong)') }};
+            background: {{ $hayFallos ? 'rgba(239,68,68,0.12)' : ($hayAdvertencias ? 'rgba(245,158,11,0.12)' : 'var(--c-surface-2)') }};
+            color: {{ $hayFallos ? '#fca5a5' : ($hayAdvertencias ? '#fcd34d' : 'var(--c-text-soft)') }};
         ">
         @if ($hayFallos)
             <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
@@ -16,24 +16,24 @@
             <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0"></span>
             <span>Advertencia</span>
         @elseif ($verificando)
-            <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse flex-shrink-0"></span>
+            <span class="w-2 h-2 rounded-full bg-zinc-400 animate-pulse flex-shrink-0"></span>
             <span>Verificando...</span>
         @else
             <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#22c55e; box-shadow:0 0 6px #22c55e;"></span>
-            <span>Kairo activo</span>
+            <span class="hidden sm:inline">Servicios activos</span>
         @endif
     </button>
 
     {{-- Popover --}}
     <div x-show="abierto" x-cloak x-transition
         class="absolute right-0 rounded-xl shadow-2xl z-50"
-        style="width:440px; top:calc(100% + 8px); background:var(--kairo-bg-2); border:1px solid var(--kairo-border);">
+        style="width:min(440px, calc(100vw - 2rem)); top:calc(100% + 8px); background:var(--c-surface-2); border:1px solid var(--c-border);">
 
         {{-- Header --}}
-        <div class="px-4 py-3 flex items-center justify-between" style="border-bottom:1px solid var(--kairo-border)">
+        <div class="px-4 py-3 flex items-center justify-between" style="border-bottom:1px solid var(--c-border)">
             <div>
-                <div class="text-sm font-bold" style="color:var(--kairo-text)">Estado de servicios Kairo</div>
-                <div class="text-xs mt-0.5" style="color:var(--kairo-text-dim)">
+                <div class="text-sm font-bold" style="color:var(--c-text)">Estado de servicios</div>
+                <div class="text-xs mt-0.5" style="color:var(--c-text-dim)">
                     @if ($verificando)
                         Verificando en tiempo real... ({{ $totalVerificados }}/12)
                     @elseif ($ultimaVerificacion)
@@ -78,8 +78,8 @@
             @endphp
 
             @if (empty($grupos) && !$verificando)
-                <div class="px-4 py-8 text-center text-xs" style="color:var(--kairo-text-dim)">
-                    Sin verificaciones. Usa "Verificar ahora" o espera el cron (cada 30 min).
+                <div class="px-4 py-8 text-center text-xs" style="color:var(--c-text-dim)">
+                    Sin verificaciones. Usa "Verificar ahora" o espera la verificación automática (cada 3 h).
                 </div>
             @else
                 @foreach ($gruposOrden as $nombreGrupo)
@@ -93,10 +93,10 @@
 
                     {{-- Header del grupo --}}
                     <div class="px-4 py-2 flex items-center justify-between sticky top-0"
-                        style="background:var(--kairo-bg-2); border-bottom:1px solid rgba(255,255,255,0.06); z-index:1;">
+                        style="background:var(--c-surface-2); border-bottom:1px solid rgba(255,255,255,0.06); z-index:1;">
                         <div class="flex items-center gap-2">
                             <span class="text-sm">{{ $icono }}</span>
-                            <span class="text-xs font-bold uppercase tracking-wider" style="color:var(--kairo-text-dim)">
+                            <span class="text-xs font-bold uppercase tracking-wider" style="color:var(--c-text-dim)">
                                 {{ $nombreGrupo }}
                             </span>
                         </div>
@@ -113,7 +113,7 @@
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
                                 <span class="text-[10px]" style="color:#34d399">OK</span>
                             @elseif ($verificando)
-                                <span class="text-[10px] animate-pulse" style="color:var(--kairo-text-dim)">pendiente</span>
+                                <span class="text-[10px] animate-pulse" style="color:var(--c-text-dim)">pendiente</span>
                             @endif
                         </div>
                     </div>
@@ -132,13 +132,13 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="text-xs font-semibold flex items-center justify-between gap-2"
-                                    style="color:{{ $item['estado'] === 'ok' ? 'var(--kairo-text)' : ($item['estado'] === 'advertencia' ? '#fcd34d' : '#fca5a5') }}">
+                                    style="color:{{ $item['estado'] === 'ok' ? 'var(--c-text)' : ($item['estado'] === 'advertencia' ? '#fcd34d' : '#fca5a5') }}">
                                     <span class="truncate">{{ $item['servicio'] }}</span>
                                     @if ($item['duracion_ms'])
-                                        <span class="font-normal text-[10px] flex-shrink-0" style="color:var(--kairo-text-dim)">{{ $item['duracion_ms'] }}ms</span>
+                                        <span class="font-normal text-[10px] flex-shrink-0" style="color:var(--c-text-dim)">{{ $item['duracion_ms'] }}ms</span>
                                     @endif
                                 </div>
-                                <div class="text-xs mt-0.5 break-words leading-relaxed" style="color:var(--kairo-text-dim)">{{ $item['mensaje'] ?? '—' }}</div>
+                                <div class="text-xs mt-0.5 break-words leading-relaxed" style="color:var(--c-text-dim)">{{ $item['mensaje'] ?? '—' }}</div>
                             </div>
                         </div>
                     @endforeach
@@ -149,7 +149,7 @@
                         @for ($i = 0; $i < $pendientesGrupo; $i++)
                             <div class="flex items-center gap-3 px-4 py-2.5" style="border-bottom:1px solid rgba(255,255,255,0.04)">
                                 <span class="w-2 h-2 rounded-full bg-gray-600 inline-block flex-shrink-0 animate-pulse"></span>
-                                <span class="text-xs animate-pulse" style="color:var(--kairo-text-dim)">Verificando...</span>
+                                <span class="text-xs animate-pulse" style="color:var(--c-text-dim)">Verificando...</span>
                             </div>
                         @endfor
                     @endif
@@ -169,8 +169,8 @@
                 }
             }
         @endphp
-        <div class="px-4 py-2 text-xs flex items-center justify-between" style="color:var(--kairo-text-dim);border-top:1px solid var(--kairo-border)">
-            <span>Cron automático: cada 30 min</span>
+        <div class="px-4 py-2 text-xs flex items-center justify-between" style="color:var(--c-text-dim);border-top:1px solid var(--c-border)">
+            <span>Verificación automática: cada 3 h</span>
             @if ($totalItems > 0)
                 <span>{{ $totalOk }}/{{ $totalItems }} servicios OK</span>
             @endif

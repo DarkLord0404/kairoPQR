@@ -3,7 +3,7 @@
     {{-- Estado actual --}}
     <div class="kairo-panel p-5">
         <div class="flex items-center justify-between mb-4">
-            <span class="text-sm font-bold" style="color: var(--kairo-blue-light)">Estado del bot</span>
+            <span class="text-sm font-bold" style="color: var(--c-accent-soft)">Estado del bot</span>
         </div>
 
         @if ($reunionesActivas)
@@ -17,12 +17,12 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="text-sm font-semibold mb-1" style="color: #34d399">Kairo está {{ $reunion['estado'] }}</div>
-                    <div class="text-xs mb-0.5 font-medium" style="color: var(--kairo-text)">
+                    <div class="text-xs mb-0.5 font-medium" style="color: var(--c-text)">
                         {{ $reunion['titulo'] }}
                     </div>
                     <a href="{{ $reunion['url'] }}" target="_blank"
                        class="text-xs break-all"
-                       style="color: var(--kairo-blue-dim)">
+                       style="color: var(--c-text-soft)">
                         {{ $reunion['url'] }}
                     </a>
                     @if($reunion['heartbeat_second'] > 0)
@@ -48,9 +48,9 @@
         @else
             {{-- Libre --}}
             <div class="rounded-xl p-4 flex items-center gap-3"
-                 style="background: rgba(255,255,255,0.03); border: 1px solid var(--kairo-border);">
+                 style="background: rgba(255,255,255,0.03); border: 1px solid var(--c-border);">
                 <span class="w-3 h-3 rounded-full bg-gray-500 inline-block flex-shrink-0"></span>
-                <span class="text-sm" style="color: var(--kairo-text-dim)">Kairo no está en ninguna reunión</span>
+                <span class="text-sm" style="color: var(--c-text-dim)">Kairo no está en ninguna reunión</span>
             </div>
         @endif
     </div>
@@ -72,7 +72,7 @@
                     };
                 @endphp
                 <div class="flex items-center justify-between gap-3 text-xs">
-                    <span class="truncate" style="color:var(--kairo-text)">{{ $trabajo['titulo'] }}</span>
+                    <span class="truncate" style="color:var(--c-text)">{{ $trabajo['titulo'] }}</span>
                     <span class="text-right" style="color:#fbbf24">{{ $etiqueta }}</span>
                 </div>
             @endforeach
@@ -81,14 +81,14 @@
 
     {{-- Formulario de conexión --}}
     <div class="kairo-panel p-5 space-y-4">
-        <div class="flex items-center gap-2 pb-3" style="border-bottom: 1px solid var(--kairo-border)">
+        <div class="flex items-center gap-2 pb-3" style="border-bottom: 1px solid var(--c-border)">
             <span class="text-lg">🎙️</span>
-            <span class="text-sm font-bold" style="color: var(--kairo-blue-light)">Conectar a reunión</span>
+            <span class="text-sm font-bold" style="color: var(--c-accent-soft)">Conectar a reunión</span>
         </div>
 
         {{-- URL --}}
         <div class="space-y-1.5">
-            <label class="text-xs font-semibold uppercase tracking-wider" style="color: var(--kairo-text-dim)">
+            <label class="text-xs font-semibold uppercase tracking-wider" style="color: var(--c-text-dim)">
                 Link de Google Meet
             </label>
             <input
@@ -96,25 +96,25 @@
                 type="url"
                 placeholder="https://meet.google.com/xxx-xxxx-xxx"
                 class="w-full text-sm rounded-lg px-3 py-2.5 outline-none transition-all"
-                style="background: rgba(255,255,255,0.05); border: 1px solid var(--kairo-border); color: var(--kairo-text);"
-                @focus="$el.style.borderColor='rgba(99,179,255,0.5)'"
-                @blur="$el.style.borderColor='var(--kairo-border)'"
+                style="background: rgba(255,255,255,0.05); border: 1px solid var(--c-border); color: var(--c-text);"
+                @focus="$el.style.borderColor='rgb(var(--c-accent-rgb) / 0.5)'"
+                @blur="$el.style.borderColor='var(--c-border)'"
                 >
         </div>
 
         {{-- Título --}}
         <div class="space-y-1.5">
-            <label class="text-xs font-semibold uppercase tracking-wider" style="color: var(--kairo-text-dim)">
-                Título <span class="font-normal normal-case" style="color: var(--kairo-text-dim)">(opcional)</span>
+            <label class="text-xs font-semibold uppercase tracking-wider" style="color: var(--c-text-dim)">
+                Título <span class="font-normal normal-case" style="color: var(--c-text-dim)">(opcional)</span>
             </label>
             <input
                 wire:model="titulo"
                 type="text"
                 placeholder="Nombre de la reunión"
                 class="w-full text-sm rounded-lg px-3 py-2.5 outline-none transition-all"
-                style="background: rgba(255,255,255,0.05); border: 1px solid var(--kairo-border); color: var(--kairo-text);"
-                @focus="$el.style.borderColor='rgba(99,179,255,0.5)'"
-                @blur="$el.style.borderColor='var(--kairo-border)'"
+                style="background: rgba(255,255,255,0.05); border: 1px solid var(--c-border); color: var(--c-text);"
+                @focus="$el.style.borderColor='rgb(var(--c-accent-rgb) / 0.5)'"
+                @blur="$el.style.borderColor='var(--c-border)'"
                 >
         </div>
 
@@ -132,7 +132,7 @@
             wire:loading.attr="disabled"
             wire:target="conectar"
             class="w-full text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all"
-            style="background:#1d4ed8;color:#fff;border:1px solid rgba(99,179,255,0.4);cursor:pointer">
+            style="background:var(--c-accent);color:#fff;border:1px solid rgb(var(--c-accent-rgb) / 0.4);cursor:pointer">
             <span wire:loading wire:target="conectar"
                   class="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
             <span wire:loading.remove wire:target="conectar">
@@ -143,7 +143,7 @@
     </div>
 
     {{-- Nota informativa --}}
-    <div class="text-xs px-1 space-y-1" style="color: var(--kairo-text-dim)">
+    <div class="text-xs px-1 space-y-1" style="color: var(--c-text-dim)">
         <p>Kairo se unirá directamente sin necesitar invitación formal. Si la reunión tiene sala de espera, esperará hasta que alguien lo admita.</p>
         <p>La grabación y el acta quedarán en el historial de reuniones al terminar.</p>
     </div>

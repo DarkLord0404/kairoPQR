@@ -12,7 +12,16 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                display: ['"Space Grotesk"', ...defaultTheme.fontFamily.sans],
+            },
+            colors: {
+                // Acento de Clara (petróleo). Reemplaza los antiguos blue/indigo.
+                accent: {
+                    50: '#effaf9', 100: '#d6f1ee', 200: '#ade2dc', 300: '#7fcdc5',
+                    400: '#6cc4bd', 500: '#2f948f', 600: '#26807c', 700: '#1f6b68',
+                    800: '#1b5654', 900: '#163f3e', 950: '#0b2221',
+                },
             },
         },
     },

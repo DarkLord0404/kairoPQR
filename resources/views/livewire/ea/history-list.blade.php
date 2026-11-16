@@ -11,13 +11,13 @@
             class="kairo-btn-copy text-xs flex items-center gap-1">
             <span>Filtros</span>
             @if ($busqueda || $fechaDesde || $fechaHasta || $clasificacionFiltro)
-                <span class="rounded-full px-1.5" style="background: rgba(59,130,246,.35); color:#93c5fd; font-size:10px;">activos</span>
+                <span class="rounded-full px-1.5" style="background: rgb(var(--c-accent-rgb) / .35); color:var(--c-text-soft); font-size:10px;">activos</span>
             @endif
             <span x-text="abierto ? '▲' : '▼'" style="font-size:9px;"></span>
         </button>
 
-        <div x-show="abierto" x-cloak x-transition class="p-3 mt-2 rounded-lg" style="background: var(--kairo-bg-2); border: 1px solid var(--kairo-border);">
-            <div class="text-xs font-semibold mb-2" style="color: var(--kairo-blue-dim);">Filtrar análisis</div>
+        <div x-show="abierto" x-cloak x-transition class="p-3 mt-2 rounded-lg" style="background: var(--c-surface-2); border: 1px solid var(--c-border);">
+            <div class="text-xs font-semibold mb-2" style="color: var(--c-text-soft);">Filtrar análisis</div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                     <label class="block kairo-label mb-1 text-xs">Caso contiene</label>
@@ -49,13 +49,13 @@
         </div>
     </div>
 
-    <hr style="border-color: var(--kairo-border); margin: 22px 0;">
+    <hr style="border-color: var(--c-border); margin: 22px 0;">
 
-    <div class="text-xs font-semibold mb-2" style="color: var(--kairo-text-dim);">
+    <div class="text-xs font-semibold mb-2" style="color: var(--c-text-dim);">
         {{ $analisis->total() }} {{ $analisis->total() === 1 ? 'análisis' : 'análisis' }} encontrados
     </div>
 
-    <div class="kairo-panel overflow-hidden" style="border: 1px solid var(--kairo-border);">
+    <div class="kairo-panel overflow-hidden" style="border: 1px solid var(--c-border);">
         <table class="kairo-table">
             <thead>
                 <tr>
@@ -69,22 +69,22 @@
             <tbody>
                 @forelse ($analisis as $a)
                     <tr>
-                        <td style="color: var(--kairo-text-dim)" class="whitespace-nowrap">{{ $a->created_at->format('d/m/Y H:i') }}</td>
+                        <td style="color: var(--c-text-dim)" class="whitespace-nowrap">{{ $a->created_at->format('d/m/Y H:i') }}</td>
                         <td>{{ $a->user?->name ?? '—' }}</td>
-                        <td style="color: var(--kairo-text); white-space: normal; word-wrap: break-word;">{{ \Illuminate\Support\Str::limit($a->caso, 90) }}</td>
+                        <td style="color: var(--c-text); white-space: normal; word-wrap: break-word;">{{ \Illuminate\Support\Str::limit($a->caso, 90) }}</td>
                         <td>
                             @php
                                 $colorClasif = match($a->clasificacion) {
                                     'Evento adverso' => ['bg' => 'rgba(239,68,68,0.15)', 'color' => '#fca5a5'],
                                     'No evento adverso' => ['bg' => 'rgba(16,185,129,0.15)', 'color' => '#6ee7b7'],
                                     'Incidente' => ['bg' => 'rgba(245,158,11,0.15)', 'color' => '#fcd34d'],
-                                    default => ['bg' => 'rgba(59,130,246,0.15)', 'color' => 'var(--kairo-blue-dim)'],
+                                    default => ['bg' => 'rgb(var(--c-accent-rgb) / 0.15)', 'color' => 'var(--c-text-soft)'],
                                 };
                             @endphp
                             @if ($a->clasificacion)
                                 <span class="text-xs font-semibold px-2 py-1 rounded-md" style="background: {{ $colorClasif['bg'] }}; color: {{ $colorClasif['color'] }}">{{ $a->clasificacion }}</span>
                             @else
-                                <span class="text-xs" style="color: var(--kairo-text-dim)">—</span>
+                                <span class="text-xs" style="color: var(--c-text-dim)">—</span>
                             @endif
                         </td>
                         <td>
@@ -92,7 +92,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="px-4 py-8 text-center" style="color: var(--kairo-text-dim)">No hay análisis que coincidan con los filtros.</td></tr>
+                    <tr><td colspan="5" class="px-4 py-8 text-center" style="color: var(--c-text-dim)">No hay análisis que coincidan con los filtros.</td></tr>
                 @endforelse
             </tbody>
         </table>

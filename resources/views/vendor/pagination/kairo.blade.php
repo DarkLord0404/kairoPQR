@@ -1,5 +1,5 @@
 @if ($paginator->hasPages())
-    <nav class="flex items-center justify-between flex-wrap gap-2" style="color: var(--kairo-text-dim)">
+    <nav class="flex items-center justify-between flex-wrap gap-2" style="color: var(--c-text-dim)">
         <div class="text-xs">
             Página {{ $paginator->currentPage() }} de {{ $paginator->lastPage() }}
         </div>
@@ -13,13 +13,13 @@
 
             @foreach ($elements as $element)
                 @if (is_string($element))
-                    <span class="text-xs px-2" style="color: var(--kairo-text-dim)">{{ $element }}</span>
+                    <span class="text-xs px-2" style="color: var(--c-text-dim)">{{ $element }}</span>
                 @endif
 
                 @if (is_array($element))
                     @foreach ($element as $page => $url)
                         @if ($page == $paginator->currentPage())
-                            <span class="kairo-btn-copy text-xs" style="background: rgba(59,130,246,.35); color:#93c5fd;">{{ $page }}</span>
+                            <span class="kairo-btn-copy text-xs" style="background: rgb(var(--c-accent-rgb) / .35); color:var(--c-text-soft);">{{ $page }}</span>
                         @else
                             <button type="button" wire:click="gotoPage({{ $page }})" wire:loading.attr="disabled" class="kairo-btn-copy text-xs">{{ $page }}</button>
                         @endif

@@ -34,7 +34,7 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="mb-4 text-sm" style="color:var(--kairo-text-dim);">
+    <div class="mb-4 text-sm" style="color:var(--c-text-dim);">
         {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
     </div>
 

@@ -1,8 +1,8 @@
 <div class="max-w-7xl mx-auto space-y-6">
     <div>
-        <div class="text-xs font-semibold uppercase tracking-wider" style="color:var(--kairo-blue-dim)">Configuración</div>
-        <h1 class="text-2xl font-bold mt-1" style="color:var(--kairo-text)">Consumo de OpenClaw</h1>
-        <p class="text-sm mt-1" style="color:var(--kairo-text-dim)">Tokens procesados por PQR y eventos adversos. Esta métrica no representa un cobro de API.</p>
+        <div class="text-xs font-semibold uppercase tracking-wider" style="color:var(--c-text-soft)">Configuración</div>
+        <h1 class="text-2xl font-bold mt-1" style="color:var(--c-text)">Consumo de OpenClaw</h1>
+        <p class="text-sm mt-1" style="color:var(--c-text-dim)">Tokens procesados por PQR y eventos adversos. Esta métrica no representa un cobro de API.</p>
     </div>
 
     <div class="kairo-panel p-4 grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -47,18 +47,18 @@
     <div class="grid md:grid-cols-2 gap-4">
         @foreach ($porModulo as $nombre => $datos)
             <div class="kairo-panel p-5">
-                <div class="text-sm font-bold mb-3" style="color:var(--kairo-blue-light)">{{ $nombre === 'EA' ? 'Eventos adversos' : $nombre }}</div>
+                <div class="text-sm font-bold mb-3" style="color: var(--c-text)">{{ $nombre === 'EA' ? 'Eventos adversos' : $nombre }}</div>
                 <div class="grid grid-cols-3 gap-3 text-center">
-                    <div><div class="text-xl font-bold" style="color:var(--kairo-text)">{{ number_format($datos['tokens'], 0, ',', '.') }}</div><div class="text-xs" style="color:var(--kairo-text-dim)">Tokens</div></div>
-                    <div><div class="text-xl font-bold" style="color:var(--kairo-text)">{{ $datos['promedio'] === null ? '—' : number_format($datos['promedio'], 0, ',', '.') }}</div><div class="text-xs" style="color:var(--kairo-text-dim)">Promedio</div></div>
-                    <div><div class="text-xl font-bold" style="color:var(--kairo-text)">{{ $datos['medidos'] }}/{{ $datos['analisis'] }}</div><div class="text-xs" style="color:var(--kairo-text-dim)">Medidos</div></div>
+                    <div><div class="text-xl font-bold" style="color:var(--c-text)">{{ number_format($datos['tokens'], 0, ',', '.') }}</div><div class="text-xs" style="color:var(--c-text-dim)">Tokens</div></div>
+                    <div><div class="text-xl font-bold" style="color:var(--c-text)">{{ $datos['promedio'] === null ? '—' : number_format($datos['promedio'], 0, ',', '.') }}</div><div class="text-xs" style="color:var(--c-text-dim)">Promedio</div></div>
+                    <div><div class="text-xl font-bold" style="color:var(--c-text)">{{ $datos['medidos'] }}/{{ $datos['analisis'] }}</div><div class="text-xs" style="color:var(--c-text-dim)">Medidos</div></div>
                 </div>
             </div>
         @endforeach
     </div>
 
-    <div class="kairo-panel overflow-hidden" style="border:1px solid var(--kairo-border)">
-        <div class="px-4 py-3 text-sm font-bold" style="color:var(--kairo-text);border-bottom:1px solid var(--kairo-border)">Últimas actividades del periodo</div>
+    <div class="kairo-panel overflow-hidden" style="border:1px solid var(--c-border)">
+        <div class="px-4 py-3 text-sm font-bold" style="color:var(--c-text);border-bottom:1px solid var(--c-border)">Últimas actividades del periodo</div>
         <div class="overflow-x-auto">
             <table class="kairo-table">
                 <thead><tr><th>Fecha</th><th>Módulo</th><th>Usuario</th><th>Modelo</th><th>Entrada</th><th>Salida</th><th>Caché</th><th>Total</th><th>Llamadas</th><th>Tiempo</th></tr></thead>
@@ -75,12 +75,12 @@
                             <td>{{ $fila['duracion_segundos'] === null ? '—' : number_format($fila['duracion_segundos'], 1, ',', '.').' s' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="10" class="px-4 py-8 text-center" style="color:var(--kairo-text-dim)">No hay análisis en el periodo seleccionado.</td></tr>
+                        <tr><td colspan="10" class="px-4 py-8 text-center" style="color:var(--c-text-dim)">No hay análisis en el periodo seleccionado.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div class="text-xs" style="color:var(--kairo-text-dim)">Los análisis anteriores a la instrumentación pueden tener solamente el total o aparecer sin medición. No se consulta ni muestra contenido clínico.</div>
+    <div class="text-xs" style="color:var(--c-text-dim)">Los análisis anteriores a la instrumentación pueden tener solamente el total o aparecer sin medición. No se consulta ni muestra contenido clínico.</div>
 </div>
