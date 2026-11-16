@@ -7,9 +7,9 @@
         <meta name="theme-color" content="#ffffff">
 
         <title>Clara · Kairo</title>
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}?v=3">
-        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=3">
-        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=3">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}?v=4">
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=4">
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=4">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -19,10 +19,11 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased kairo-theme">
+        <x-clara-bg />
         <div class="kairo-shell min-h-screen flex flex-col">
             <div class="flex flex-col justify-center items-center px-4 py-10 flex-1">
                 <a href="/" wire:navigate class="flex flex-col items-center text-center">
-                    <img src="{{ asset('clara.webp') }}" alt="Clara" class="w-16 h-16 rounded-full object-cover">
+                    <span class="c-clara" style="width:72px;height:72px"><img src="{{ asset('clara.webp') }}" alt="Clara"></span>
                     <div class="c-brand-name mt-3 text-lg">Clara<span class="c-brand-dot"></span></div>
                     <div class="c-brand-sub mt-0.5">Calidad · Kairo</div>
                 </a>

@@ -8,13 +8,13 @@
     $paso = $secciones ? 3 : 1;
 @endphp
 
-<div>
+<div x-data="{ escrito: false }">
     {{-- Encabezado --}}
-    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-4">
         <div>
             <div class="c-eyebrow">Seguridad del paciente</div>
-            <h1 class="c-title mt-1">Análisis de eventos adversos</h1>
-            <p class="text-sm mt-1.5 max-w-xl" style="color:var(--c-text-dim)">Casos clínicos con enfoque en seguridad del paciente, eventos adversos e incidentes. Clara genera un análisis institucional listo para informe interno.</p>
+            <h1 class="c-title mt-0.5">Análisis de eventos adversos</h1>
+            <p class="text-sm mt-1 max-w-2xl" style="color:var(--c-text-dim)">Casos clínicos con enfoque en seguridad del paciente, eventos adversos e incidentes. Clara genera un análisis institucional listo para informe interno.</p>
         </div>
         @if ($esMaster)
             <div class="c-kpis">
@@ -33,14 +33,32 @@
             <span class="c-step {{ $paso > 2 ? 'is-done' : '' }}" wire:loading.class="is-active" wire:target="analizar"><i>{{ $paso > 2 ? '✓' : '2' }}</i>Análisis de Clara</span>
             <span class="c-step-line"></span>
             <span class="c-step {{ $paso === 3 ? 'is-active' : '' }}"><i>3</i>Revisión e informe</span>
+            <div class="c-assist">
+                <div class="c-bubble">
+                    <span wire:loading.remove wire:target="analizar">
+                        @if ($secciones)
+                            Listo. Revisa la respuesta y las alertas antes de usarla.
+                        @else
+                            <span x-show="!escrito">Pega el caso y la historia clínica; yo me encargo del resto.</span>
+                            <span x-show="escrito" x-cloak>Perfecto. Cuando estés listo, presiona <b>Analizar con Clara</b>.</span>
+                        @endif
+                    </span>
+                    <span wire:loading wire:target="analizar">Estoy revisando el caso<span class="c-dots"><i></i><i></i><i></i></span></span>
+                </div>
+                <span class="c-clara c-clara-md {{ $secciones ? 'is-done' : '' }}" wire:loading.class="is-thinking" wire:target="analizar"
+                      x-data="{ rx: 0, ry: 0 }"
+                      @mousemove.window="const r = $el.getBoundingClientRect(); ry = Math.max(-1, Math.min(1, (event.clientX - r.left - r.width / 2) / 600)) * 18; rx = -Math.max(-1, Math.min(1, (event.clientY - r.top - r.height / 2) / 400)) * 14">
+                    <img src="{{ asset('clara.webp') }}" alt="Clara" :style="`transform: perspective(240px) rotateX(${rx}deg) rotateY(${ry}deg); transition: transform .2s ease-out`">
+                </span>
+            </div>
         </div>
 
         <div class="c-split">
             <div>
-                <label class="kairo-label block mb-2">Descripción del caso</label>
-                <textarea wire:model="caso" rows="10"
+                <div class="c-fieldhead"><label class="kairo-label">Descripción del caso</label></div>
+                <textarea wire:model="caso" x-on:input="escrito = $event.target.value.trim().length > 0"
                     placeholder="Describa el caso: motivo de consulta, atención recibida, reingreso, hallazgos relevantes..."
-                    class="kairo-textarea w-full text-sm p-3"></textarea>
+                    class="kairo-textarea c-fit-ta w-full text-sm p-3"></textarea>
             </div>
             @include('livewire.partials.historia-field')
         </div>

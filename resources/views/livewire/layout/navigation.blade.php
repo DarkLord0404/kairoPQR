@@ -66,15 +66,17 @@ new class extends Component
         'configuracion.prompts' => ['Administración', 'Prompts del sistema'],
         'profile' => ['Cuenta', 'Perfil'],
         'acerca-de' => ['Clara', 'Acerca de'],
+        'configuracion.sepsis' => ['Guías de práctica clínica', 'Sepsis · conexión con Google Drive'],
     ];
     $encabezado = $titulos[$ruta] ?? null;
 @endphp
 
-<div x-data="{ open: false }" @keydown.escape.window="open = false">
+<div x-data="{ open: false }" @keydown.escape.window="open = false" style="display: contents">
+  <div class="c-topwrap">
     <header class="c-header">
         <div class="c-container c-header-row">
             <a href="{{ route('dashboard') }}" wire:navigate class="c-brand">
-                <img src="{{ asset('clara.webp') }}" alt="Clara">
+                <span class="c-clara c-clara-sm"><img src="{{ asset('clara.webp') }}" alt="Clara"></span>
                 <span>
                     <span class="c-brand-name block">Clara<span class="c-brand-dot"></span></span>
                     <span class="c-brand-sub block">Calidad · Kairo</span>
@@ -144,6 +146,7 @@ new class extends Component
             </nav>
         </div>
     @endif
+  </div>
 
     @if ($encabezado)
         <div class="c-container c-pagehead">

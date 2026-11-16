@@ -46,7 +46,7 @@
         }
     }">
 
-    <div class="flex items-center justify-between mb-2">
+    <div class="c-fieldhead">
         <label class="kairo-label">Historia clínica o registros</label>
         <label x-show="!archivoNombre"
             class="flex items-center gap-1.5 cursor-pointer text-xs px-2.5 py-1 rounded-md transition-colors"
@@ -91,15 +91,15 @@
     </div>
 
     {{-- Textarea sin archivo — intercepta paste largo --}}
-    <textarea x-show="!archivoNombre" wire:model="historia" rows="10"
+    <textarea x-show="!archivoNombre" wire:model="historia"
         placeholder="Pegue aquí historia clínica, evoluciones, notas, órdenes, epicrisis, triage..."
-        class="kairo-textarea w-full text-sm p-3"
+        class="kairo-textarea c-fit-ta w-full text-sm p-3"
         @paste="manejarPegado($event)"></textarea>
 
     {{-- Vista previa con archivo --}}
     <div x-show="archivoNombre && !cargando" x-cloak
-        class="kairo-textarea w-full text-xs p-3 overflow-y-auto"
-        style="height:216px;white-space:pre-wrap;word-break:break-word;color:var(--c-text-dim)"
+        class="kairo-textarea c-fit-ta w-full text-xs p-3 overflow-y-auto"
+        style="white-space:pre-wrap;word-break:break-word;color:var(--c-text-dim)"
         x-text="$wire.historia ? $wire.historia.substring(0,1500) + ($wire.historia.length > 1500 ? '\n\n[...]' : '') : ''">
     </div>
 </div>
