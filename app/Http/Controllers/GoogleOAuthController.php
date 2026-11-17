@@ -75,7 +75,7 @@ class GoogleOAuthController extends Controller
 </head><body><div class="box"><div class="icon">❌</div>
 <div class="title">Autorización fallida</div>
 <div class="msg">{$dato}</div>
-<a href="javascript:window.close()" class="btn">Cerrar ventana</a>
+<a href="https://kairo.koqoi.com/conexiones" class="btn">Volver a Conexiones</a>
 </div></body></html>
 HTML;
             return response($html, 400)->header('Content-Type', 'text/html');
@@ -95,7 +95,7 @@ HTML;
 <div class="title">Cuenta autorizada correctamente</div>
 <div class="cuenta">{$dato}</div>
 <div class="msg">El token quedó guardado. Esta ventana se cerrará en 3 segundos.</div>
-<a href="javascript:window.close()" class="btn">Cerrar ahora</a>
+<a href="https://kairo.koqoi.com/conexiones" class="btn">Volver a Conexiones</a>
 </div></body></html>
 HTML;
         return response($html)->header('Content-Type', 'text/html');

@@ -11,7 +11,7 @@
             <p style="color:var(--c-text-dim)">{{ $connection['message'] }}</p>
             <p class="text-sm" style="color:var(--c-text-dim);overflow-wrap:anywhere">Cuenta: <strong>alexander.torres@clinicadeoccidente.com</strong></p>
             <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ route('sepsis.drive.connect') }}" class="inline-flex items-center rounded-md px-4 py-2 font-semibold text-sm" style="background:var(--c-accent);color:white">{{ $connection['state'] === 'missing' ? 'Autorizar Google Drive' : 'Reautorizar Google Drive' }}</a>
+                <a href="https://kairo.koqoi.com/conexiones" class="inline-flex items-center rounded-md px-4 py-2 font-semibold text-sm" style="background:var(--c-accent);color:white">{{ $connection['state'] === 'ok' ? 'Gestionar conexión en Kairo' : 'Autorizar en Kairo → Conexiones' }}</a>
                 <form method="POST" action="{{ route('sepsis.drive.verify') }}">@csrf
                     <button type="submit" class="rounded-md px-4 py-2 text-sm" style="border:1px solid var(--c-border);color:var(--c-text)">Verificar conexión</button>
                 </form>

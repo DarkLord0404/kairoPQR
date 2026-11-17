@@ -55,7 +55,8 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(['acceso.reuniones'])
         ->name('reuniones');
 
-    Route::get('reuniones/cuentas', MeetingCuentas::class)->middleware(['master'])->name('reuniones.cuentas');
+    // Las conexiones de cuentas se administran en Kairo (kairo.koqoi.com/conexiones)
+    Route::redirect('reuniones/cuentas', 'https://kairo.koqoi.com/conexiones')->name('reuniones.cuentas');
 
     Route::get('reuniones/conectar', ReunionConectar::class)->middleware(['master'])->name('reuniones.conectar');
 
@@ -79,7 +80,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('profile', 'profile')->name('profile');
 
-    Route::get('usuarios', Manager::class)->middleware(['master'])->name('users');
+    // Usuarios y permisos se administran en Kairo (kairo.koqoi.com/accesos)
+    Route::redirect('usuarios', 'https://kairo.koqoi.com/accesos')->name('users');
 });
 
 // Callback de OAuth de Google Calendar: publico (lo llama Google, no un usuario logueado)

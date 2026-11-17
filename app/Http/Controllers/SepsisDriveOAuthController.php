@@ -110,6 +110,6 @@ class SepsisDriveOAuthController extends Controller
             rename($temp, $dir.'/'.$name);
         }
         Cache::forget('sepsis.drive.connection');
-        return redirect()->route('configuracion.sepsis')->with('status', 'Cuenta institucional autorizada correctamente.');
+        return redirect()->away('https://kairo.koqoi.com/conexiones');
     }
 }
