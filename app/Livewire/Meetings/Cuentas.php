@@ -28,7 +28,7 @@ class Cuentas extends Component
             'client_id'     => config('services.google_oauth.client_id'),
             'redirect_uri'  => config('services.google_oauth.redirect_uri'),
             'response_type' => 'code',
-            'scope'         => 'https://www.googleapis.com/auth/calendar.events',
+            'scope'         => 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly',
             'access_type'   => 'offline',
             'prompt'        => 'consent',
             'state'         => $cuenta,
